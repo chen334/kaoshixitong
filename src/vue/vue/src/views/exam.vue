@@ -108,7 +108,19 @@
           <el-input v-model="user.exam_room" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="考试时间" >
-          <el-input v-model="user.exam_time" autocomplete="off"></el-input>
+<!--          <el-input v-model="user.exam_time" autocomplete="off"></el-input>-->
+          <div>
+            <h3>选择日期和持续时间</h3>
+            <el-date-picker
+                v-model="user.exam_time"
+                type="date"
+                placeholder="选择日期"
+                :clearable="true"
+            ></el-date-picker>
+            <el-form-item label="持续时间" >
+              <el-input v-model="user.exam_duration" autocomplete="off"></el-input>
+            </el-form-item>
+          </div>
         </el-form-item>
         <el-form-item label="监考老师" >
           <el-input v-model="user.teacher" autocomplete="off"></el-input>
@@ -140,15 +152,6 @@
 
     <el-dialog title="手动组卷" :visible.sync="dialogFormVisible3">
       <template>
-<!--        <el-select v-model="exam" placeholder="请选择" @change="selectQuestion">-->
-<!--          <el-option-->
-<!--              v-for="item in questiontype"-->
-<!--              :key="item.value"-->
-<!--              :label="item.label"-->
-<!--              :value="item.value"-->
-<!--              >-->
-<!--          </el-option>-->
-<!--        </el-select>-->
         <el-transfer filterable :filter-method="filterMethod"  filter-placeholder="输入值" v-model="examdata.handleQuestionIds" :data="questiondata"></el-transfer>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible3 = false">取 消</el-button>
@@ -252,7 +255,13 @@ export default {
     load(){
       this.request.get("http://localhost:8086/exam/page?pagenum="+this.pagenum+"&pagesize="+this.pagesize).then(res =>{
         console.log(res)
-        this.tabledata = res.data.records
+        this.tabledata = res.data.records.map(record => {
+          // 对每个 record 的 exam_time 属性进行时区转换
+          let utcDate = new Date(record.exam_time);
+          record.exam_time = utcDate.toLocaleString();
+          return record;
+        });
+
         this.total = res.data.total
       }),
       this.request.get("http://localhost:8086/question/class").then(res =>{

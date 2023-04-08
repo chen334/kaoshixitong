@@ -156,7 +156,7 @@ export default {
   },
   methods:{
     tosave(){
-      this.request.post("http://localhost:8086/user/save", this.user).then(res => {
+      this.request.post("http://localhost:8086/user/save",this.user).then(res => {
         if (res.data){
           this.dialogFormVisible=false
           this.load()
@@ -166,7 +166,6 @@ export default {
           this.$message.error("保存失败")
         }
       })
-      // console.log("form:"+this.form)
     },
     edit(scope){
       this.user=scope.row

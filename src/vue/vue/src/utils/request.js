@@ -5,6 +5,7 @@ import ElementUI from "element-ui";
 
 const request = axios.create({
     baseURL:'/api',
+    withCredentials: true,
     timeout:5000
 })
 
@@ -23,16 +24,16 @@ request.interceptors.request.use(config =>{
     return Promise.reject(error)
 });
 
-// request.interceptors.request.use( config =>{
-//     config.headers['Content-Type']='application/json;charset=utf-8';
-//     let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {}
-//     if (user){
-//         config.headers['token']=user.token;//设置请求头
-//     }
-//     return config
-// },error => {
-//     return Promise.reject(error)
-// });
+request.interceptors.request.use( config =>{
+    config.headers['Content-Type']='application/json;charset=utf-8';
+    let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {}
+    if (user){
+        config.headers['token']=user.token;//设置请求头
+    }
+    return config
+},error => {
+    return Promise.reject(error)
+});
 //response拦截器
 //可以在接口响应后统一处理结果
 request.interceptors.response.use(response =>{
@@ -75,5 +76,15 @@ request.interceptors.response.use(response =>{
 // },error => {
 //     return Promise.reject(error)
 // });
-
+axios.interceptors.response.use(
+    response => {
+        return response;
+    },
+    error => {
+        if (error.response.status === 401) {
+            router.push({ path: "/login" });
+        }
+        return Promise.reject(error);
+    }
+);
 export default request

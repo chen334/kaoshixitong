@@ -45,8 +45,9 @@ export default {
             console.log(a)
             // console.log(res)
             if (res.code == 1){
+
               // sessionStorage.setItem("user",res.data.username)
-              // localStorage.setItem("user",JSON.stringify(res.data))  //存储用户信息到浏览器
+              localStorage.setItem("user",JSON.stringify(res.data))  //存储用户信息到浏览器
               if (res.data.type ==1){
                 this.$router.push("/index")
               }else if (res.data.type ==2){

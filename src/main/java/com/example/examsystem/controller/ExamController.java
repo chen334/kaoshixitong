@@ -35,6 +35,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,7 @@ public class ExamController {
 
     @PostMapping("/save")
     public R<Boolean> save(@RequestBody Exam exam){
+        exam.setCreate_time(new Date());
         return R.success(examService.saveOrUpdate(exam));
     }
 

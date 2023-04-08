@@ -5,8 +5,8 @@
     <el-tab-pane label="已提交" name="second">已提交</el-tab-pane>
     <el-tab-pane label="评分完成" name="third">评分完成</el-tab-pane>
   </el-tabs>
-  <div style="margin-bottom: 100px">
-    <div style="border: 1px solid #ccc;border-radius: 10px;margin: 10px 0" v-for="item in tabeldata" :key="item.id">
+  <div style="margin-bottom: 100px" >
+    <div style="border: 1px solid #ccc;border-radius: 10px;margin: 10px 0" v-for="item in tabeldata" :key="item.id" class="mobile-card">
       <div style="color:#666;padding: 10px">{{item.name}}</div>
       <div style="color: #666;margin: 10px 0;">
         <span style="margin-left: 20px">教室：{{item.exam_room}}</span>
@@ -40,18 +40,26 @@ export default {
     get(){
       console.log(this.stable,"123",this.activeName)
       this.changestable()
-      this.request.post("http://localhost:8086/exam/listOn?stable="+this.stable).then(res =>{
-        console.log(res)
-        this.tabeldata = res.data
-      })
+      // this.request.post("http://localhost:8086/exam/listOn?stable="+this.stable).then(res =>{
+      //   console.log(res)
+      //   console.log("456456")
+      //   this.tabledata = res.map(data => {
+      //     // 对每个 record 的 exam_time 属性进行时区转换
+      //     console.log("123123")
+      //     console.log(data.exam_time)
+      //     let utcDate = new Date(data.exam_time);
+      //     data.exam_time = utcDate.toLocaleString();
+      //     return data;
+      //   });
+      // })
     },
-    load(){
-      this.request.get("http://localhost:9090/exam/page?pagenum="+this.pagenum+"&pagesize="+this.pagesize+"&username="+this.username+"").then(res =>{
-        console.log(res)
-        this.tabledata = res.data
-        this.total = res.total
-      })
-    },
+    // load(){
+    //   this.request.get("http://localhost:9090/exam/page?pagenum="+this.pagenum+"&pagesize="+this.pagesize+"&username="+this.username+"").then(res =>{
+    //     console.log(res)
+    //     this.tabledata = res.data
+    //     this.total = res.total
+    //   })
+    // },
     doexam(id){
       this.$router.push('/front/exam?eid='+id)
     },
@@ -73,5 +81,16 @@ export default {
 </script>
 
 <style scoped>
+/* 添加媒体查询，针对小于 768px 的屏幕设备 */
+.mobile-card {
+  display: inline-block;
+  width: 100%;
+}
 
+@media (min-width: 768px) {
+  .mobile-card {
+    display: inline-block;
+    width: auto;
+  }
+}
 </style>

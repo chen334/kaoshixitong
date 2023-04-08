@@ -13,10 +13,9 @@
 <!--      </el-upload>-->
       <el-upload
           class="avatar-uploader "
-          action="http://localhost:8086/common/upload"
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
-          :before-upload="beforeAvatarUpload">
+          :before-upload="customHttpRequest">
         <img v-if="imageUrl" :src="imageUrl" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
@@ -85,7 +84,10 @@ export default {
       })
       // console.log("form:"+this.form)
     },
-
+    upload(file){
+      const token = '';
+      this.request.post("http://localhost:8086/common/upload",file)
+    },
     handleAvatarSuccess(res, file) {
       console.log("111111")
       console.log(file)
@@ -107,8 +109,29 @@ export default {
         this.$message.error('上传头像图片大小不能超过 2MB!');
       }
       return isJPG && isLt2M;
-    }
+    },
+    async customHttpRequest(options) {
+      const { file } = options;
+      const formData = new FormData();
+      formData.append('file', file);
 
+      try {
+        const response = this.request.post('http://localhost:8086/common/upload?file=',formData)
+            // , formData
+            // , {
+        //   headers: {
+        //     'Content-Type': 'multipart/form-data'
+        //   }
+        // });
+
+        // 如果上传成功，调用onSuccess处理函数
+        if (response.status === 200) {
+          this.handleAvatarSuccess(response.data);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+      }
+    }
   }
 }
 </script>

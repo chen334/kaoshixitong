@@ -18,4 +18,5 @@ public class User implements Serializable {
     private Integer address;
     private Integer nickname;
     private Integer type;
+    private String url;
 }

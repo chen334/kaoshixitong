@@ -18,7 +18,14 @@ public class CorsConig {
         // 是否发送 Cookie
         config.setAllowCredentials(true);
         // 支持请求方式
-        config.addAllowedMethod("*");
+//        config.addAllowedMethod("*");
+        config.addAllowedMethod("OPTIONS");
+        config.addAllowedMethod("HEAD");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("PUT");
+        config.addAllowedMethod("POST");
+        config.addAllowedMethod("DELETE");
+        config.addAllowedMethod("PATCH");
         // 允许的原始请求头部信息
         config.addAllowedHeader("*");
         // 暴露的头部信息

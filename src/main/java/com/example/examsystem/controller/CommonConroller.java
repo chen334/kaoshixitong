@@ -7,8 +7,10 @@ import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.examsystem.common.R;
 import com.example.examsystem.entity.Test;
+import com.example.examsystem.entity.User;
 import com.example.examsystem.mapper.TestMapper;
 import com.example.examsystem.service.TestService;
+import com.example.examsystem.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,6 +38,8 @@ public class CommonConroller {
     private String basePath;
     @Autowired
     private TestService testService;
+    @Autowired
+    private UserService userService;
 
 //    @PostMapping("/upload")
 //    public R<String> upload(MultipartFile file){
@@ -76,7 +81,8 @@ public class CommonConroller {
 //    }
 
     @PostMapping("/upload")
-    public String upload(@RequestParam MultipartFile file) throws IOException {
+    public String upload(@RequestParam MultipartFile file, HttpSession session) throws IOException {
+        log.info("111111");
         String originalFilename =file.getOriginalFilename();
         String type= FileUtil.extName(originalFilename);
         long size=file.getSize();
@@ -102,10 +108,15 @@ public class CommonConroller {
 //        }
 
         //存储数据库
-        Test saveFile = new Test();
-        saveFile.setName(originalFilename);
-        saveFile.setUrl(url);
-        testMapper.insert(saveFile);
+//        Test saveFile = new Test();
+//        saveFile.setName(originalFilename);
+//        saveFile.setUrl(url);
+//        log.info(String.valueOf(session.getAttribute("user")));
+        User saveAvege = new User();
+        saveAvege.setId((Integer) session.getAttribute("user"));
+        saveAvege.setUrl(url);
+        userService.updateById(saveAvege);
+//        testMapper.insert(saveFile);
         return url;
     }
 

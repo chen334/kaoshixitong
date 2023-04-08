@@ -4,6 +4,12 @@ spring:
     url: jdbc:mysql://localhost:3306/exam1?serverTimezone=GMT%2b8
     username: user
     password: 123456
+    druid:
+      max-active:10
+      min-idle:5
+      max-wait:10000000000000
+  session:
+    store-type: jdbc
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射

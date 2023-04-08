@@ -10,6 +10,7 @@ import com.example.examsystem.entity.User;
 import com.example.examsystem.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletRequest;
@@ -26,9 +27,11 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private HttpSession session;
 
     @PostMapping("/login")
-    public R<User> login(@RequestBody User user, HttpSession session, HttpServletRequest servletRequest, HttpServletResponse response){
+    public R<User> login(@RequestBody User user, HttpServletRequest servletRequest, HttpServletResponse response){
         String name = user.getUsername();
         String password = String.valueOf(user.getPassword());
         if (StringUtils.isBlank(name)||StringUtils.isBlank(String.valueOf(password))){
@@ -55,6 +58,13 @@ public class UserController {
             return R.success(user1);
         }
         return R.error("账号密码不正确");
+    }
+
+
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(HttpSession session){
+        session.invalidate();
+        return ResponseEntity.ok("Logged out successfully");
     }
 
     @GetMapping("/page")
