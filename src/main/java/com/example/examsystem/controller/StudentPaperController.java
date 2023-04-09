@@ -4,15 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.examsystem.common.R;
-import com.example.examsystem.entity.Question;
 import com.example.examsystem.entity.StudentPaper;
 import com.example.examsystem.service.StudentPaperService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
+import javax.servlet.http.HttpSession;
+
 
 @RestController
 @RequestMapping("/studentpaper")
@@ -22,20 +21,26 @@ public class StudentPaperController {
     private StudentPaperService studentPaperService;
 
     @PostMapping("/save")
-    private R save(@RequestBody StudentPaper studentPaper){
-        log.info(String.valueOf(studentPaper)+"1111111111111111111111111111111111111");
-        if (studentPaper.getId()==null){
-            List<StudentPaper> list = studentPaperService.list(new QueryWrapper<StudentPaper>().eq("eid",studentPaper.getEid()));
+    private R save(@RequestBody StudentPaper studentPaper,HttpSession session) {
+        int id = 0;
+//        Object user = session.getAttribute("user");
+        Integer uid = studentPaper.getUid();
+        int count = studentPaperService.count(new QueryWrapper<StudentPaper>().eq("uid", uid));
+
+        if (count > 0) {
+            // 学生ID已存在，返回错误信息
+            return R.error("学生已提交试卷");
+        } else {
+            // 学生ID不存在，插入数据
+            studentPaperService.save(studentPaper);
+            return R.success("成功");
         }
-        studentPaperService.saveOrUpdate(studentPaper);
-        return R.success("成功");
     }
 
     @GetMapping("/page")
     public R<Page> page(@RequestParam int pagenum, @RequestParam int pagesize){
         Page<StudentPaper> studentPaperPage = new Page<>(pagenum,pagesize);
         studentPaperService.page(studentPaperPage);
-        log.info(String.valueOf(studentPaperPage));
         return R.success(studentPaperPage);
     }
 

@@ -8,11 +8,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.examsystem.common.R;
+import com.example.examsystem.common.StreamUtil;
 import com.example.examsystem.dto.ExamDto;
 import com.example.examsystem.dto.HandleExamDto;
 import com.example.examsystem.entity.*;
 import com.example.examsystem.entity.Class;
+import com.example.examsystem.mapper.ExamMapper;
 import com.example.examsystem.mapper.QuestionPaperMapper;
+import com.example.examsystem.mapper.StudentPaperMapper;
 import com.example.examsystem.mapper.TestMapper;
 import com.example.examsystem.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -21,22 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
+
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.websocket.server.PathParam;
-import javax.xml.transform.Result;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -57,6 +49,10 @@ public class ExamController {
     private TestService testService;
     @Autowired
     private TestMapper testMapper;
+    @Autowired
+    private StudentPaperMapper studentPaperMapper;
+    @Autowired
+    private ExamMapper examMapper;
 
 
     @Value("${file.upload-path}")
@@ -171,6 +167,47 @@ public class ExamController {
 //        List<Exam> list = examService.list();
         List<Exam> list = examService.listByStable(stable);
         return R.success(list);
+    }
+
+    @PostMapping("/list123")
+    public R list123(@RequestParam int stable,@RequestParam int uid){
+        LambdaQueryWrapper<StudentPaper> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StudentPaper::getUid,uid);
+        List<StudentPaper> studentPapers = studentPaperMapper.selectList(queryWrapper);
+
+        List<Map<String, Object>> resultList = studentPapers.stream()
+                .filter(StreamUtil.distinctByKey(StudentPaper::getEid))
+                .map(studentPaper -> {
+                    Map<String, Object> resultMap = new HashMap<>();
+                    resultMap.put("eid", studentPaper.getEid());
+                    resultMap.put("score", studentPaper.getScore());
+                    return resultMap;
+                }).collect(Collectors.toList());
+
+        LambdaQueryWrapper<Exam> examQueryWrapper = new LambdaQueryWrapper<>();
+        List<Exam> exams = examMapper.selectList(examQueryWrapper);
+        List<Exam>  filteredExams;
+
+        if (stable == 0) {
+            filteredExams = exams.stream()
+                    .filter(exam -> resultList.stream().noneMatch(result -> Objects.equals(result.get("eid"), exam.getId())))
+                    .collect(Collectors.toList());
+        } else if (stable == 1) {
+            filteredExams = exams.stream()
+                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") == null))
+                    .collect(Collectors.toList());
+        } else if (stable == 2) {
+            filteredExams = exams.stream()
+                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") != null))
+                    .collect(Collectors.toList());
+        } else {
+            return R.error("Invalid stable value.");
+        }
+
+        log.info("11111111111111111");
+        log.info(String.valueOf(filteredExams));
+
+        return R.success(filteredExams);
     }
 
     @PostMapping("/infolist")

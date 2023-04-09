@@ -36,26 +36,46 @@ export default {
       tabeldata:{},
       activeName: 'first',
       stable: 1,
+      user:{}
     }
   },
   created() {
+    this.user = JSON.parse(localStorage.getItem("user"))
   this.get()
   },
   methods:{
+    // get(){
+    //   console.log(this.stable,"123",this.activeName)
+    //   this.changestable()
+    //   this.request.post("http://localhost:8086/exam/listOn?stable="+this.stable).then(res =>{
+    //     console.log(res)
+    //     // this.tabeldata = res.data
+    //         this.tabeldata = res.data.map(data => {
+    //               // 对每个 record 的 exam_time 属性进行时区转换
+    //               console.log("123123")
+    //               console.log(data.exam_time)
+    //               let utcDate = new Date(data.exam_time);
+    //               data.exam_time = utcDate.toLocaleString();
+    //               return data;
+    //             });
+    //   })
+    // },
     get(){
       console.log(this.stable,"123",this.activeName)
       this.changestable()
-      this.request.post("http://localhost:8086/exam/listOn?stable="+this.stable).then(res =>{
+
+
+      this.request.post("http://localhost:8086/exam/list123?stable="+this.stable+"&uid="+this.user.id).then(res =>{
         console.log(res)
         // this.tabeldata = res.data
-            this.tabeldata = res.data.map(data => {
-                  // 对每个 record 的 exam_time 属性进行时区转换
-                  console.log("123123")
-                  console.log(data.exam_time)
-                  let utcDate = new Date(data.exam_time);
-                  data.exam_time = utcDate.toLocaleString();
-                  return data;
-                });
+        this.tabeldata = res.data.map(data => {
+          // 对每个 record 的 exam_time 属性进行时区转换
+          console.log("123123")
+          console.log(data.exam_time)
+          let utcDate = new Date(data.exam_time);
+          data.exam_time = utcDate.toLocaleString();
+          return data;
+        });
       })
     },
     changestable(){

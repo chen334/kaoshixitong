@@ -64,7 +64,9 @@ export default {
     }
   },
   created() {
-
+    // this.user = localStorage.getItem("user")
+    this.user = JSON.parse(localStorage.getItem("user"))
+    console.log(this.user.id)
     this.request.post("http://localhost:8086/exam/infolist?eid=" + this.eid).then(res => {
       console.log("infolist")
       console.log(res)
@@ -79,7 +81,7 @@ export default {
     this.request.get("http://localhost:8086/exam/view/" + this.eid).then(res => {
       console.log(res)
       this.question = res.data
-      this.user = res.user
+      // this.user = res.user
     })
 
   },
@@ -88,7 +90,7 @@ export default {
       console.log(this.question)
       console.log(this.exam.id)
       console.log(this.eid)
-      this.request.post("http://localhost:8086/studentpaper/save",{eid:this.eid,paper:JSON.stringify(this.question)}).then(res =>{
+      this.request.post("http://localhost:8086/studentpaper/save",{uid:this.user.id,eid:this.eid,paper:JSON.stringify(this.question)}).then(res =>{
         if (res.code=='1'){
           this.$message.success("提交成功")
           this.$router.push('/front')
