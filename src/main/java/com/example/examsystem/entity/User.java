@@ -12,6 +12,7 @@ public class User implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private Integer phone;
+    private Integer classId;
     private String username;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Integer password;

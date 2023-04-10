@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 public class Exam implements Serializable {
     private int id;
-    private int classId;
+    private String classId;
     private String exam_name;
     private String exam_room;
     private Date exam_time;

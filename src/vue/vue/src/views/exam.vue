@@ -122,6 +122,16 @@
             </el-form-item>
           </div>
         </el-form-item>
+        <el-form-item label="适用班级">
+          <el-select v-model="selectedClasses" multiple placeholder="请选择适用班级">
+            <el-option
+                v-for="item in classOptions"
+                :key="item.id"
+                :label="item.className"
+                :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="监考老师" >
           <el-input v-model="user.teacher" autocomplete="off"></el-input>
         </el-form-item>
@@ -222,14 +232,25 @@ export default {
           {value: '3',label: '填空题'}
       ],
       exam:{},
-      examdata:{}
+      examdata:{},
+      classOptions: [],
+      selectedClasses: []
     }
   },
   created() {
     this.load()
+    this.fetchClasses()
   },
   methods:{
     tosave(){
+      console.log(88888888)
+      console.log(this.selectedClasses);
+      console.log(this.user.classId);
+      console.log(888888)
+      this.user.classId = this.selectedClasses;
+      this.user.classId = this.user.classId.join(',');
+      console.log(this.user.classId)
+      console.log(this.user)
       this.request.post("http://localhost:8086/exam/save",this.user).then(res => {
         if (res.data){
           this.dialogFormVisible=false
@@ -372,6 +393,15 @@ export default {
     },
     test11(){
       this.request.get("http://localhost:8086/exam/test")
+    },
+    fetchClasses() {
+      // 这里调用您的后端接口获取班级列表，并将结果赋值给 classOptions
+      // 假设后端返回的班级列表格式为：[{id: 1, name: '班级1'}, {id: 2, name: '班级2'}]
+      this.request.get("http://localhost:8086/classm/list").then((response) => {
+        this.classOptions = response.data;
+      }).catch((error) => {
+        console.error('获取班级列表失败', error);
+      });
     }
   }
 }

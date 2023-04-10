@@ -41,6 +41,7 @@
       <el-table-column type="selection" width="55" ></el-table-column>
       <el-table-column prop="id" label="id" width="80"></el-table-column>
       <el-table-column prop="username" label="用户名" width="80"></el-table-column>
+      <el-table-column prop="classId" label="班级" width="80"></el-table-column>
       <el-table-column prop="nickname" label="用户昵称" width="80"></el-table-column>
       <el-table-column prop="phone" label="手机号" width="80"></el-table-column>
       <el-table-column prop="address" label="地址" width="80"></el-table-column>
@@ -87,6 +88,16 @@
         </el-form-item>
         <el-form-item label="地址" >
           <el-input v-model="user.address" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="适用班级">
+          <el-select v-model="selectedClasses" multiple placeholder="请选择适用班级">
+            <el-option
+                v-for="item in classOptions"
+                :key="item.id"
+                :label="item.className"
+                :value="item.id"
+            ></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -147,12 +158,14 @@ export default {
         label: '老师'
       }],
       type: [],
-      batInsert:{
-      }
+      batInsert:{},
+      classOptions: [],
+      selectedClasses: []
     }
   },
   created() {
-    this.load()
+    this.load();
+    this.fetchClasses();
   },
   methods:{
     tosave(){
@@ -240,6 +253,17 @@ export default {
 
       this.request.post("http://localhost:8086/user/generator?classCode="+this.batInsert.classCod+"&Num="+this.batInsert.Num+"").then(res=>{
       })
+    },
+    fetchClasses() {
+      // 这里调用您的后端接口获取班级列表，并将结果赋值给 classOptions
+      // 假设后端返回的班级列表格式为：[{id: 1, name: '班级1'}, {id: 2, name: '班级2'}]
+      this.request.get("http://localhost:8086/classm/list").then((response) => {
+        console.log("999999999999999")
+        console.log(response)
+        this.classOptions = response.data;
+      }).catch((error) => {
+        console.error('获取班级列表失败', error);
+      });
     }
   }
 }
