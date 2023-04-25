@@ -31,6 +31,7 @@
     <el-table-column prop="exam_name" label="考试名称" width="80"></el-table-column>
     <el-table-column prop="exam_room" label="考试教室"width="80"></el-table-column>
     <el-table-column prop="exam_time" label="考试时间"></el-table-column>
+    <el-table-column prop="exam_duration" label="持续时间"></el-table-column>
     <el-table-column prop="teacher" label="监考老师"></el-table-column>
     <el-table-column label="下载">
       <template slot-scope="scope">
@@ -104,24 +105,31 @@
             </el-option>
           </el-select>
         </el-form-item>
+
         <el-form-item label="考试教室" >
           <el-input v-model="user.exam_room" autocomplete="off"></el-input>
         </el-form-item>
+
         <el-form-item label="考试时间" >
 <!--          <el-input v-model="user.exam_time" autocomplete="off"></el-input>-->
           <div>
-            <h3>选择日期和持续时间</h3>
+            <h3>选择日期和持续时间：</h3>
+
+            <el-form-item label="日期时间">
             <el-date-picker
                 v-model="user.exam_time"
-                type="date"
-                placeholder="选择日期"
-                :clearable="true"
-            ></el-date-picker>
+                type="datetime"
+                placeholder="选择日期时间">
+            </el-date-picker>
+            </el-form-item>
+
             <el-form-item label="持续时间" >
               <el-input v-model="user.exam_duration" autocomplete="off"></el-input>
             </el-form-item>
+
           </div>
         </el-form-item>
+
         <el-form-item label="适用班级">
           <el-select v-model="selectedClasses" multiple placeholder="请选择适用班级">
             <el-option

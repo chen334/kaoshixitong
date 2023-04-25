@@ -2,6 +2,9 @@ package com.example.examsystem.controller;
 
 
 
+import cn.hutool.poi.excel.ExcelReader;
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.ExcelWriter;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,15 +12,25 @@ import com.example.examsystem.common.R;
 import com.example.examsystem.entity.User;
 import com.example.examsystem.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,4 +124,69 @@ public class UserController {
     public R deleteBatch(@RequestBody List<Integer> ids){
         return R.success(userService.removeByIds(ids));
     }
+
+    @GetMapping("/export")
+    public void export(HttpServletResponse response) throws Exception{
+//        List<User> list = userMapper.findAll();
+        List<User> list = userService.list();
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+        writer.write(list,true);
+
+        //浏览器响应格式
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+        String fileName = URLEncoder.encode("用户信息","UTF-8");
+        response.setHeader("Content-Disposition","attachment;filename="+fileName+".xlsx");
+        ServletOutputStream out = response.getOutputStream();
+        writer.flush(out,true);
+        out.close();
+        writer.close();
+    }
+
+    @PostMapping("/import")
+    public R imp(MultipartFile file) throws Exception{
+        InputStream inputStream = file.getInputStream();
+        ExcelReader reader = ExcelUtil.getReader(inputStream);
+        List<User> list = reader.readAll(User.class);
+        userService.saveBatch(list);
+        return R.success(true);
+    }
+
+//    @PostMapping("/importUsers")
+//    public ResponseEntity<String> importUsers(@RequestParam("file") MultipartFile file) {
+//        try {
+//            // 读取 Excel 文件
+//            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+//            Sheet sheet = workbook.getSheetAt(0);
+//
+//            // 遍历每一行
+//            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+//                Row row = sheet.getRow(i);
+//
+//                // 从 Excel 行中读取用户信息
+//                String username = row.getCell(0).getStringCellValue();
+//                String email = row.getCell(1).getStringCellValue();
+//                String password = row.getCell(2).getStringCellValue();
+//
+//                // 创建一个新的 User 对象
+//                User user = new User();
+//                user.setUsername(username);
+//                user.setEmail(email);
+//                user.setPassword(password);
+//
+//                // 保存新创建的用户
+//                userService.save(user);
+//            }
+//
+//            // 关闭 Workbook
+//            workbook.close();
+//
+//            return ResponseEntity.ok("Users imported successfully!");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to import users.");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+//}
 }

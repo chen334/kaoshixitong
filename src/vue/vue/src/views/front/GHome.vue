@@ -9,19 +9,33 @@
       <div class="exam-card" v-for="item in tabeldata" :key="item.id">
         <div class="exam-title">{{item.name}}</div>
         <div class="exam-details">
-          <span>考试名称：{{item.exam_name}}</span>
-          <span>教室：{{item.exam_room}}</span>
-          <span>老师：{{item.teacher}}</span>
-          <span>考试时间：{{item.exam_time}}分</span>
-          <span>考试时长：{{item.exam_duration}}分</span>
+          <span>考试名称：{{item.exam.exam_name}}</span>
+          <span>教室：{{item.exam.exam_room}}</span>
+          <span>老师：{{item.exam.teacher}}</span>
+          <span>考试时间：{{item.exam.exam_time}}分</span>
+          <span>考试时长：{{item.exam.exam_duration}}分</span>
         </div>
         <el-button
             style="margin-left: 20px"
             type="primary"
-            :disabled="!isExamTime(item.exam_time)"
+            :disabled="!isExamTime(item.exam.exam_time)"
             @click="doexam(item)"
-        >{{ isExamTime(item.exam_time) ? "开始考试" : "未到考试时间" }}
+            v-if="stable == 0"
+        >{{ isExamTime(item.exam.exam_time) ? "开始考试" : "未到考试时间" }}
         </el-button>
+        <el-button
+            v-if="stable == 1"
+            size="small"
+            type="primary"
+            :disabled="true"
+        >
+          已提交试卷
+        </el-button>
+        <template v-if="stable == 2">
+        <span :class="['score',{'text-green': item.score >= 60, 'text-red': item.score < 60}]">
+          {{ item.score }}
+        </span>
+        </template>
       </div>
     </div>
   </div>
@@ -44,26 +58,9 @@ export default {
   this.get()
   },
   methods:{
-    // get(){
-    //   console.log(this.stable,"123",this.activeName)
-    //   this.changestable()
-    //   this.request.post("http://localhost:8086/exam/listOn?stable="+this.stable).then(res =>{
-    //     console.log(res)
-    //     // this.tabeldata = res.data
-    //         this.tabeldata = res.data.map(data => {
-    //               // 对每个 record 的 exam_time 属性进行时区转换
-    //               console.log("123123")
-    //               console.log(data.exam_time)
-    //               let utcDate = new Date(data.exam_time);
-    //               data.exam_time = utcDate.toLocaleString();
-    //               return data;
-    //             });
-    //   })
-    // },
     get(){
       console.log(this.stable,"123",this.activeName)
       this.changestable()
-
 
       this.request.post("http://localhost:8086/exam/list123?stable="+this.stable+"&uid="+this.user.id).then(res =>{
         console.log(res)
@@ -72,8 +69,11 @@ export default {
           // 对每个 record 的 exam_time 属性进行时区转换
           console.log("123123")
           console.log(data.exam_time)
-          let utcDate = new Date(data.exam_time);
-          data.exam_time = utcDate.toLocaleString();
+          let utcDate = new Date(data.exam.exam_time);
+          data.exam.exam_time = utcDate.toLocaleString();
+          data.score = data.score;
+          console.log("1111111")
+          console.log(data.score); // 这里可以访问 score 字段
           return data;
         });
       })
@@ -94,7 +94,12 @@ export default {
     doexam(item) {
       const currentTime = new Date();
       const examStartTime = new Date(item.exam_time);
-      if (currentTime >= examStartTime) {
+      console.log("currenttime")
+      console.log(currentTime)
+      console.log("examStartime")
+      console.log(item.exam_time)
+      console.log(examStartTime)
+      if (currentTime <= examStartTime) {
         this.$router.push("/front/exam?eid=" + item.id);
       } else {
         this.$message.warning("未到考试时间");
@@ -237,4 +242,28 @@ export default {
   }
 }
 
+
+.text-green {
+  color: green;
+}
+.text-red {
+  color: red;
+}
+.score {
+  font-size: 40px;
+  position: relative;
+  top: -90px;
+  right: 0;
+}
+.exam-details {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.score {
+  font-size: 60px;
+  position: relative;
+  top: 0;
+  right: 0;
+}
 </style>

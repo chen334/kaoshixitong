@@ -53,6 +53,8 @@ public class ExamController {
     private StudentPaperMapper studentPaperMapper;
     @Autowired
     private ExamMapper examMapper;
+    @Autowired
+    private UserService userService;
 
 
     @Value("${file.upload-path}")
@@ -175,6 +177,8 @@ public class ExamController {
         queryWrapper.eq(StudentPaper::getUid,uid);
         List<StudentPaper> studentPapers = studentPaperMapper.selectList(queryWrapper);
 
+        User user = userService.getById(uid);
+
         List<Map<String, Object>> resultList = studentPapers.stream()
                 .filter(StreamUtil.distinctByKey(StudentPaper::getEid))
                 .map(studentPaper -> {
@@ -186,26 +190,66 @@ public class ExamController {
 
         LambdaQueryWrapper<Exam> examQueryWrapper = new LambdaQueryWrapper<>();
         List<Exam> exams = examMapper.selectList(examQueryWrapper);
-        List<Exam>  filteredExams;
+        exams = exams.stream()
+                .filter(exam -> Arrays.asList(exam.getClassId().split(",")).contains(Integer.toString(user.getClassId())))
+                .collect(Collectors.toList());
+
+        List<Map<String, Object>> filteredExams;
 
         if (stable == 0) {
             filteredExams = exams.stream()
                     .filter(exam -> resultList.stream().noneMatch(result -> Objects.equals(result.get("eid"), exam.getId())))
+                    .map(exam -> {
+                        Map<String, Object> examMap = new HashMap<>();
+                        examMap.put("exam", exam);
+                        return examMap;
+                    })
                     .collect(Collectors.toList());
         } else if (stable == 1) {
             filteredExams = exams.stream()
                     .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") == null))
+                    .map(exam -> {
+                        Map<String, Object> examMap = new HashMap<>();
+                        examMap.put("exam", exam);
+                        return examMap;
+                    })
                     .collect(Collectors.toList());
         } else if (stable == 2) {
             filteredExams = exams.stream()
                     .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") != null))
+                    .map(exam -> {
+                        Map<String, Object> result = resultList.stream().filter(r -> Objects.equals(r.get("eid"), exam.getId())).findFirst().orElse(null);
+                        Map<String, Object> examMap = new HashMap<>();
+                        examMap.put("exam", exam);
+                        if (result != null) {
+                            examMap.put("score", result.get("score"));
+                        }
+                        return examMap;
+                    })
                     .collect(Collectors.toList());
         } else {
             return R.error("Invalid stable value.");
         }
-
-        log.info("11111111111111111");
-        log.info(String.valueOf(filteredExams));
+//        List<Exam>  filteredExams;
+//
+//        if (stable == 0) {
+//            filteredExams = exams.stream()
+//                    .filter(exam -> resultList.stream().noneMatch(result -> Objects.equals(result.get("eid"), exam.getId())))
+//                    .collect(Collectors.toList());
+//        } else if (stable == 1) {
+//            filteredExams = exams.stream()
+//                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") == null))
+//                    .collect(Collectors.toList());
+//        } else if (stable == 2) {
+//            filteredExams = exams.stream()
+//                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") != null))
+//                    .collect(Collectors.toList());
+//        } else {
+//            return R.error("Invalid stable value.");
+//        }
+//
+//        log.info("11111111111111111");
+//        log.info(String.valueOf(filteredExams));
 
         return R.success(filteredExams);
     }

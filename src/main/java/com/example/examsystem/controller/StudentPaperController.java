@@ -25,7 +25,8 @@ public class StudentPaperController {
         int id = 0;
 //        Object user = session.getAttribute("user");
         Integer uid = studentPaper.getUid();
-        int count = studentPaperService.count(new QueryWrapper<StudentPaper>().eq("uid", uid));
+        Integer eid = studentPaper.getEid();
+        int count = studentPaperService.count(new QueryWrapper<StudentPaper>().eq("uid", uid).eq("eid",eid));
 
         if (count > 0) {
             // 学生ID已存在，返回错误信息

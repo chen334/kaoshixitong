@@ -31,8 +31,11 @@
         <el-button type="danger" slot="reference">批量删除<i class="el-icon-remove-outline ml-5"></i></el-button>
       </el-popconfirm>
       <a class="ml-5"></a>
-      <el-upload action="http://localhost:9090/user/import" style="display: inline-block" accept=".xlsx" :show-file-list="false" :on-success="handleExcelImportSuccess">
-        <el-button type="primary" @click="">导入<i class="el-icon-bottom ml-5"style="margin-left: 5px"></i></el-button>
+<!--      <el-upload action="http://localhost:8086/user/import" style="display: inline-block" accept=".xlsx" :show-file-list="false" :on-success="handleExcelImportSuccess">-->
+<!--        <el-button type="primary" @click="">导入<i class="el-icon-bottom ml-5"style="margin-left: 5px"></i></el-button>-->
+<!--      </el-upload>-->
+      <el-upload action="http://localhost:8086/user/import" style="display: inline-block" accept=".xlsx" :show-file-list="false" :on-success="handleExcelImportSuccess" :headers="headers">
+        <el-button type="primary" @click="">导入<i class="el-icon-bottom ml-5" style="margin-left: 5px"></i></el-button>
       </el-upload>
       <el-button type="primary" @click="exp" class="ml-5">导出<i class="el-icon-top ml-5"style="margin-left: 5px"></i></el-button>
     </div>
@@ -238,7 +241,7 @@ export default {
       })
     },
     exp(){
-      window.open("http://localhost:9090/user/export")
+      window.open("http://localhost:8086/user/export")
     },
     handleExcelImportSuccess(){
       this.$message.success("导入成功")
@@ -264,7 +267,8 @@ export default {
       }).catch((error) => {
         console.error('获取班级列表失败', error);
       });
-    }
+    },
+
   }
 }
 </script>
