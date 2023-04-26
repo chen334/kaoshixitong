@@ -90,7 +90,7 @@ export default {
       console.log(this.question)
       console.log(this.exam.id)
       console.log(this.eid)
-      this.request.post("http://localhost:8086/studentpaper/save",{uid:this.user.id,eid:this.eid,paper:JSON.stringify(this.question)}).then(res =>{
+      this.request.post("http://localhost:8086/studentpaper/save",{uid:this.user.id,eid:this.eid,paper:JSON.stringify(this.question),examinfo:JSON.stringify(this.exam)}).then(res =>{
         if (res.code=='1'){
           this.$message.success("提交成功")
           this.$router.push('/front')

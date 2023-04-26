@@ -15,14 +15,20 @@ const routes = [
     children:[
       {path:"user",name:'用户管理',component:()=>import('../views/User')},
       {path:"home",name:'首页',component:()=>import('../views/HomeView')},
-      {path:"person",name:'个人信息',component:()=>import('../views/Person')},
       {path:"exam",name:'试卷管理',component:()=>import('../views/exam')},
       {path:"question",name:'试题管理',component:()=>import('../views/question')},
       {path:"studentpaper",name:'批卷',component:() => import('../views/studentpaper')},
       {path:"handlePaper",name:'阅卷',component:() => import('../views/HandlePaper.vue')},
       {path:"class",name:'班级',component:() => import('../views/Class')},
+      {path:"person",name:'个人信息',component:()=>import('../views/Person')}
     ]
   },
+  {
+    path: '/person',
+    name: '个人信息',
+    component:()=>import('../views/Person')
+  }
+    ,
   {
     path: '/front',
     meta:{requiresStudent:true},
@@ -31,7 +37,8 @@ const routes = [
     redirect:"/front/home",
     children: [
       {path:"home",name:'Home',component:() => import('../views/front/GHome.vue')},
-      {path:"exam",name:'FrontExam',component:() => import('../views/front/Exam.vue')}
+      {path:"exam",name:'FrontExam',component:() => import('../views/front/Exam.vue')},
+      {path:"person",name:'个人信息',component:()=>import('../views/front/Person')}
     ]
   },
   {
@@ -88,5 +95,7 @@ router.beforeEach((to,from,next)=>{
     next();
   }
 })
+
+
 
 export default router

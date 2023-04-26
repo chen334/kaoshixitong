@@ -10,7 +10,6 @@
         <el-header style="border-bottom: 1px solid #ccc;">
           <Header :collapseBtnClass="collapseBtnClass" :collapse="collapse" :user="user"></Header>
         </el-header>
-
         <el-main>
           <router-view @refreshUser="getUser"/>
         </el-main>

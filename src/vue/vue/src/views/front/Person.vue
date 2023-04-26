@@ -3,12 +3,11 @@
   <el-form label-width="80px" size="small" :model="user">
     <div style="text-align: center;margin: 10px 0">
       <el-upload
-          class="avatar-uploader"
-          action="http://localhost:9090/file/upload"
+          class="avatar-uploader "
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
-      >
-        <img v-if="user.url" :src="user.url" class="avatar">
+          :before-upload="customHttpRequest">
+        <img v-if="user.url" :src="user.url" alt="" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
     </div>
@@ -40,7 +39,7 @@ export default {
   name: "Person",
   data(){
     return{
-      user:{},
+      user:localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {},
       localstor:localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {}
     }
   },
@@ -67,11 +66,31 @@ export default {
       })
       // console.log("form:"+this.form)
     },
-    handleAvatarSuccess(res){
-      console.log(res)
-      this.user.url = res;
+    handleAvatarSuccess(res, file) {
+      console.log("111111")
+      console.log(file)
+      console.log(URL.createObjectURL(file.raw))
+      this.$forceUpdate()
+      this.imageUrl = URL.createObjectURL(file.raw);
+      this.user.url = URL.createObjectURL(file.raw);
+      console.log(this.user.url)
     },
+    async customHttpRequest(options) {
+      const { file } = options;
+      const formData = new FormData();
+      formData.append('file', file);
 
+      try {
+        const response = this.request.post('http://localhost:8086/common/upload?file=',formData)
+
+        // 如果上传成功，调用onSuccess处理函数
+        if (response.status === 200) {
+          this.handleAvatarSuccess(response.data);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+      }
+    }
   }
 }
 </script>

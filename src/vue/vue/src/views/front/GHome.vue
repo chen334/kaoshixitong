@@ -92,15 +92,16 @@ export default {
       this.get()
     },
     doexam(item) {
+      console.log(item)
       const currentTime = new Date();
-      const examStartTime = new Date(item.exam_time);
+      const examStartTime = new Date(item.exam.exam_time);
       console.log("currenttime")
       console.log(currentTime)
       console.log("examStartime")
-      console.log(item.exam_time)
+      console.log(item.exam.exam_time)
       console.log(examStartTime)
-      if (currentTime <= examStartTime) {
-        this.$router.push("/front/exam?eid=" + item.id);
+      if (currentTime >= examStartTime) {
+        this.$router.push("/front/exam?eid=" + item.exam.id);
       } else {
         this.$message.warning("未到考试时间");
       }

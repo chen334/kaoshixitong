@@ -7,6 +7,15 @@
     </div>
 
     <div style="margin: 10px 0">
+      <el-select v-model="type" placeholder="按账号类型分类: " @change="selectByType">
+        <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+        >
+        </el-option>
+      </el-select>
       <el-button type="primary" @click="exp" class="ml-5">导出<i class="el-icon-top ml-5"></i></el-button>
       <el-popconfirm
           class="ml-5"
@@ -26,6 +35,7 @@
     <el-table-column prop="id" label="id" width="80"></el-table-column>
     <el-table-column prop="eid" label="考试名称"></el-table-column>
     <el-table-column prop="uid" label="学生姓名" width="80"></el-table-column>
+    <el-table-column prop="examinfo.exam_name" label="考试信息" width="80"></el-table-column>
     <el-table-column prop="time" label="提交时间"></el-table-column>
     <el-table-column prop="score" label="分数"></el-table-column>
     <el-table-column label="操作">
@@ -140,7 +150,6 @@ export default {
       user:{},
       user1:{},
       question:{},
-
     }
   },
   created() {
@@ -162,6 +171,18 @@ export default {
         console.log(res)
         this.tabledata = res.data.records
         this.total = res.data.total
+
+        // 解析 examinfo
+        const parsedRecords = res.data.records.map((record) => {
+          const parsedExaminfo = JSON.parse(record.examinfo);
+          return {
+            ...record,
+            examinfo: parsedExaminfo,
+          };
+        });
+        this.tabledata = parsedRecords;
+        console.log(this.tabledata)
+        console.log(res.data.records.eid)
       })
     },
     handleSizeChange(pagesize){

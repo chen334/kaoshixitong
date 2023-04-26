@@ -2,28 +2,19 @@
   <el-card style="width: 500px">
   <el-form label-width="80px" size="small" :model="user">
     <div style="text-align: center;margin: 10px 0">
-<!--      <el-upload-->
-<!--          class="avatar-uploader"-->
-<!--          action="http://localhost:8086/common/upload"-->
-<!--          :show-file-list="false"-->
-<!--          :on-success="handleAvatarSuccess"-->
-<!--      >-->
-<!--        <img v-if="user.url" :src="user.url" class="avatar">-->
-<!--        <i v-else class="el-icon-plus avatar-uploader-icon"></i>-->
-<!--      </el-upload>-->
       <el-upload
           class="avatar-uploader "
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
-          :before-upload="customHttpRequest">
-        <img v-if="imageUrl" :src="imageUrl" class="avatar">
+          :before-upload="customHttpRequest"
+          >
+        <img v-if="user.url" :src="user.url" alt="" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
     </div>
 
-
     <el-form-item label="名字" >
-      <el-input v-model="user.name" autocomplete="off" disabled ></el-input>
+      <el-input v-model="user.username" autocomplete="off" disabled ></el-input>
     </el-form-item>
 <!--    <el-form-item label="昵称" >-->
 <!--      <el-input v-model="user.nickname" autocomplete="off"></el-input>-->
@@ -46,14 +37,13 @@
 
 
 <script>
+import  axios from 'axios';
+
 export default {
   name: "Person",
   data(){
     return{
-      user:{
-
-      },
-      localstor:localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {},
+      user:localStorage.getItem("user")?JSON.parse(localStorage.getItem("user")) : {},
       imageUrl:{},
       dialogImageUrl: '',
       dialogVisible: false,
@@ -65,13 +55,7 @@ export default {
   },
   methods:{
     load(){
-      this.request.get("http://localhost:8086/common/list?id=1").then(res =>{
-        console.log(res)
-        if (res.code == '1'){
-          this.user = res.data
-        }
-        this.imageUrl ="http://localhost:8086/common/046a7e90c44e458baa3906562a877deb.jpg"
-      })
+      console.log(this.user)
     },
     tosave(){
       this.request.post("http://localhost:8086/test/save", this.user).then(res => {
@@ -115,14 +99,14 @@ export default {
       const formData = new FormData();
       formData.append('file', file);
 
+      const instance = axios.create({
+        headers:{
+          'Content-Type': 'multipart/form-data',
+        }
+      });
       try {
-        const response = this.request.post('http://localhost:8086/common/upload?file=',formData)
-            // , formData
-            // , {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data'
-        //   }
-        // });
+        // const response = this.request.post('http://localhost:8086/common/upload',formData);
+        const response = await instance.post('http://localhost:8086/common/upload',formData);
 
         // 如果上传成功，调用onSuccess处理函数
         if (response.status === 200) {

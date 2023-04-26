@@ -18,12 +18,12 @@
     <div style="width: 200px">
       <el-dropdown style="width: 100px;cursor: pointer;text-align: right;margin-right: 50px">
         <div style="display: inline-block">
-          <img src="#" alt="" style="width: 30px;height: 30px;border-radius: 50%;position: relative;top: 10px;right: 5px">
+          <img :src="user.url" alt="" style="width: 30px;height: 30px;border-radius: 50%;position: relative;top: 10px;right: 5px">
           <span>{{ user.nickname }}</span><i class="el-icon-arrow-down" style="margin-left: 5px"></i>
         </div>
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item >
-            <router-link to="/index/person" style="text-decoration: none">个人信息</router-link>
+            <router-link to="/front/person" style="text-decoration: none">个人信息</router-link>
           </el-dropdown-item>
           <el-dropdown-item >
             <span @click="logout" style="text-decoration: none">退出</span>
@@ -40,6 +40,7 @@
 </template>
 
 <script>
+import Header from "@/views/components/Header";
 export default {
   name: "Front",
   data(){

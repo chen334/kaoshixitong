@@ -9,6 +9,7 @@ public class StudentPaper {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private String paper;
+    private String examinfo;
     private Integer eid;
     private Integer uid;
     private String time;

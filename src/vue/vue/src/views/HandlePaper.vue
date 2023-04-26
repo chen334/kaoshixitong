@@ -40,6 +40,7 @@ export default {
     return{
       sp:this.$route.query.sp,
       paper:[],
+      exam:[]
     }
   },
   created() {
@@ -48,11 +49,13 @@ export default {
       console.log("123123123123123123123123123123123")
       console.log(res.data)
       this.paper=JSON.parse(res.data.paper)
+      this.exam = JSON.parse(res.data.examinfo)
       console.log("223123123123123123")
       console.log(this.paper)
+      console.log(this.exam)
       if (this.paper && this.paper.length){
         this.paper.forEach(item =>{
-          if (item.anser === item.stuanswer){
+          if (item.anser == item.stuanswer){
             item.studentScore = item.t_points
           }
         })
