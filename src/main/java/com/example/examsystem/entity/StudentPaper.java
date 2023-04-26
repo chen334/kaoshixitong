@@ -10,6 +10,8 @@ public class StudentPaper {
     private Integer id;
     private String paper;
     private String examinfo;
+    private String exam_name;
+    private Integer exam_stable;
     private Integer eid;
     private Integer uid;
     private String time;

@@ -46,35 +46,43 @@ export default {
   created() {
     console.log(this.sp)
     this.request.post("http://localhost:8086/studentpaper/list?sp="+this.sp).then(res =>{
-      console.log("123123123123123123123123123123123")
-      console.log(res.data)
       this.paper=JSON.parse(res.data.paper)
       this.exam = JSON.parse(res.data.examinfo)
-      console.log("223123123123123123")
-      console.log(this.paper)
-      console.log(this.exam)
       if (this.paper && this.paper.length){
         this.paper.forEach(item =>{
-          if (item.anser == item.stuanswer){
+          if (item.anser == item.stuanswer && item.question_type!=3){
             item.studentScore = item.t_points
+          }else if (item.question_type!=3){
+            item.studentScore = 0
           }
         })
       }
     })
   },
-  methods:{
-    submitScore(){
-      let sum=0
-      this.paper.forEach(item =>{
-        if (item.studentScore == null){
+  methods: {
+    submitScore() {
+      let sum = 0
+      let invalidScore = false;
+      this.paper.forEach(item => {
+        if (item.studentScore == null) {
           item.studentScore = 0
         }
-        sum += parseInt(item.studentScore)
+        if (parseInt(item.studentScore) > item.t_points) {
+          invalidScore = true;
+        } else {
+          sum += parseInt(item.studentScore);
+          invalidScore=false;
+        }
       })
-      this.request.post("http://localhost:8086/studentpaper/save",{id:this.sp,score:sum}).then(res =>{
-        this.$message.success("打分完成")
-        this.$router.push("/index/studentpaper")
-      })
+      if (invalidScore) {
+        this.$message.error('学生得分不能大于题目总分，请检查并重新输入');
+        // invalidScore = false
+      } else {
+        this.request.post("http://localhost:8086/studentpaper/save", {id: this.sp, score: sum}).then(res => {
+          this.$message.success("打分完成")
+          this.$router.push("/index/studentpaper")
+        })
+      }
     }
   }
 }

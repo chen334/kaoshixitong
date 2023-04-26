@@ -27,13 +27,14 @@ public class StudentPaperController {
         Integer uid = studentPaper.getUid();
         Integer eid = studentPaper.getEid();
         int count = studentPaperService.count(new QueryWrapper<StudentPaper>().eq("uid", uid).eq("eid",eid));
-
+        System.out.println(studentPaper);
         if (count > 0) {
             // 学生ID已存在，返回错误信息
             return R.error("学生已提交试卷");
         } else {
             // 学生ID不存在，插入数据
-            studentPaperService.save(studentPaper);
+            studentPaper.setExam_stable(1);
+            studentPaperService.saveOrUpdate(studentPaper);
             return R.success("成功");
         }
     }

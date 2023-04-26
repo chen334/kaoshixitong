@@ -7,14 +7,15 @@
     </div>
 
     <div style="margin: 10px 0">
-      <el-select v-model="type" placeholder="按账号类型分类: " @change="selectByType">
-        <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-        >
-        </el-option>
+      <el-select v-model="selectedExamName" placeholder="按账号类型分类: " @change="selectByType">
+<!--        <el-option-->
+<!--            v-if="examName.examinfo && examName.examinfo.exam_name"-->
+<!--            v-for="examName  in tabledata"-->
+<!--            :key="examName.examinfo.exam_name"-->
+<!--            :label="examName.examinfo.exam_name"-->
+<!--            :value="examName.examinfo.exam_name"-->
+<!--        >-->
+<!--        </el-option>-->
       </el-select>
       <el-button type="primary" @click="exp" class="ml-5">导出<i class="el-icon-top ml-5"></i></el-button>
       <el-popconfirm
@@ -55,6 +56,7 @@
       </template>
     </el-table-column>
   </el-table>
+
 
     <div style="padding: 10px 0">
       <el-pagination
@@ -130,6 +132,7 @@
       </div>
     </el-dialog>
   </div>
+
 </template>
 
 <script>
@@ -150,6 +153,8 @@ export default {
       user:{},
       user1:{},
       question:{},
+      filteredData: [],
+      selectedExamName: '',
     }
   },
   created() {
@@ -180,7 +185,10 @@ export default {
             examinfo: parsedExaminfo,
           };
         });
+
         this.tabledata = parsedRecords;
+        this.filteredData = parsedRecords;
+        this.updateOptions();
         console.log(this.tabledata)
         console.log(res.data.records.eid)
       })
@@ -255,7 +263,34 @@ export default {
     exp(){
       window.open("http://localhost:9090/studentpaper/export")
     },
-  }
+    updateOptions() {
+      const examNames = [...new Set(this.tabledata.map((record) => record.examinfo.exam_name))];
+      this.options = examNames.map((examName) => ({
+        label: examName,
+        value: examName,
+      }));
+    },
+    selectByType() {
+      if (this.type) {
+        this.filteredData = this.tabledata.filter((record) => record.examinfo.exam_name === this.type);
+      } else {
+        this.filteredData = this.tabledata;
+      }
+    },
+  },
+  computed: {
+    // uniqueExamNames() {
+    //   // 从 tabledata 中提取唯一的考试名称
+    //   const examNamesSet = new Set(
+    //       this.tabledata
+    //           .map(item => JSON.parse(item.examinfo))
+    //           .map(examInfo => examInfo.exam_name)
+    //   );
+    //   console.log("111111111111111111")
+    //   console.log(Array.from(examNamesSet))
+    //   return Array.from(examNamesSet);
+    // },
+  },
 }
 </script>
 
