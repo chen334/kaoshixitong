@@ -18,6 +18,10 @@
 <!--        </el-option>-->
       </el-select>
       <el-button type="primary" @click="exp" class="ml-5">导出<i class="el-icon-top ml-5"></i></el-button>
+      <el-tabs v-model="activeName" @tab-click="handleClick" onchange="handleClick">
+        <el-tab-pane label="待批卷" name="first">待批卷</el-tab-pane>
+        <el-tab-pane label="已批卷" name="second">已批卷</el-tab-pane>
+      </el-tabs>
       <el-popconfirm
           class="ml-5"
           confirm-button-text='好的'
@@ -155,6 +159,7 @@ export default {
       question:{},
       filteredData: [],
       selectedExamName: '',
+      activeName: 'first',
     }
   },
   created() {
@@ -275,6 +280,15 @@ export default {
         this.filteredData = this.tabledata.filter((record) => record.examinfo.exam_name === this.type);
       } else {
         this.filteredData = this.tabledata;
+      }
+    },
+    changestable(){
+      if (this.activeName == 'first'){
+        this.stable=0
+      }else if (this.activeName == 'second'){
+        this.stable=1
+      }else if (this.activeName == 'third'){
+        this.stable=2
       }
     },
   },

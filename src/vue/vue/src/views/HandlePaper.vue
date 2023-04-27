@@ -1,4 +1,4 @@
-studentpaper.vue<template>
+studentpaper.vue<template >
 <div>
   <el-table :data="paper" :header-cell-class-name="'headerBg'">
     <el-table-column prop="id" label="题目ID" sortable ></el-table-column>
@@ -31,6 +31,7 @@ studentpaper.vue<template>
     <el-button type="primary" @click="submitScore">批卷完成</el-button>
   </div>
 </div>
+
 </template>
 
 <script>
@@ -83,6 +84,11 @@ export default {
           this.$router.push("/index/studentpaper")
         })
       }
+    }
+  },
+  computed: {
+    filteredData() {
+      return this.res.filter(item => item.exam_stable == 1);
     }
   }
 }

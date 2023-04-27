@@ -230,27 +230,6 @@ public class ExamController {
         } else {
             return R.error("Invalid stable value.");
         }
-//        List<Exam>  filteredExams;
-//
-//        if (stable == 0) {
-//            filteredExams = exams.stream()
-//                    .filter(exam -> resultList.stream().noneMatch(result -> Objects.equals(result.get("eid"), exam.getId())))
-//                    .collect(Collectors.toList());
-//        } else if (stable == 1) {
-//            filteredExams = exams.stream()
-//                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") == null))
-//                    .collect(Collectors.toList());
-//        } else if (stable == 2) {
-//            filteredExams = exams.stream()
-//                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") != null))
-//                    .collect(Collectors.toList());
-//        } else {
-//            return R.error("Invalid stable value.");
-//        }
-//
-//        log.info("11111111111111111");
-//        log.info(String.valueOf(filteredExams));
-
         return R.success(filteredExams);
     }
 
