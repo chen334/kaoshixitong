@@ -5,4 +5,5 @@ import com.example.examsystem.entity.User;
 
 
 public interface UserService extends IService<User> {
+    String getUsernameByUid(Integer userId);
 }

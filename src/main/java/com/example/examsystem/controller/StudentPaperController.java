@@ -2,15 +2,18 @@ package com.example.examsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.examsystem.common.R;
 import com.example.examsystem.entity.StudentPaper;
 import com.example.examsystem.service.StudentPaperService;
+import com.example.examsystem.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.Map;
 
 
 @RestController
@@ -19,6 +22,8 @@ import javax.servlet.http.HttpSession;
 public class StudentPaperController {
     @Autowired
     private StudentPaperService studentPaperService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/save")
     private R save(@RequestBody StudentPaper studentPaper,HttpSession session) {
@@ -43,7 +48,26 @@ public class StudentPaperController {
     public R<Page> page(@RequestParam int pagenum, @RequestParam int pagesize){
         Page<StudentPaper> studentPaperPage = new Page<>(pagenum,pagesize);
         studentPaperService.page(studentPaperPage);
+        log.info("page");
+        log.info(String.valueOf(studentPaperPage));
         return R.success(studentPaperPage);
+    }
+
+    @PostMapping("/listByStableAndClass")
+    public R listByStableAndClass(@RequestParam int stable,@RequestParam int uid,@RequestParam int page,@RequestParam int size,@RequestParam(required = false) Integer filter){
+        Page<Map<String,Object>> pageParam = new Page<>(page,size);
+        IPage<Map<String,Object>> resultPage = studentPaperService.getFilteredPageByStableAndClass(stable,uid,pageParam,filter);
+        for (Map<String,Object> record : resultPage.getRecords()){
+            Integer userId = (Integer) record.get("uid");
+            if (userId!=null){
+                String username=userService.getUsernameByUid(userId);
+                if (username!=null){
+                    record.put("username",username);
+                }
+            }
+        }
+
+        return R.success(resultPage);
     }
 
     @PostMapping("/list")

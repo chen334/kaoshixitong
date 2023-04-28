@@ -8,14 +8,14 @@
 
     <div style="margin: 10px 0">
       <el-select v-model="selectedExamName" placeholder="按账号类型分类: " @change="selectByType">
-<!--        <el-option-->
-<!--            v-if="examName.examinfo && examName.examinfo.exam_name"-->
-<!--            v-for="examName  in tabledata"-->
-<!--            :key="examName.examinfo.exam_name"-->
-<!--            :label="examName.examinfo.exam_name"-->
-<!--            :value="examName.examinfo.exam_name"-->
-<!--        >-->
-<!--        </el-option>-->
+        <el-option
+            v-if="examName.examinfo && examName.examinfo.exam_name"
+            v-for="examName  in tabledata"
+            :key="examName.examinfo.exam_name"
+            :label="examName.examinfo.exam_name"
+            :value="examName.examinfo.exam_name"
+        >
+        </el-option>
       </el-select>
       <el-button type="primary" @click="exp" class="ml-5">导出<i class="el-icon-top ml-5"></i></el-button>
       <el-tabs v-model="activeName" @tab-click="handleClick" onchange="handleClick">
@@ -38,9 +38,8 @@
 
   <el-table :data="tabledata" @selection-change="handleSelectionChange" width="30%" :close-on-click-model="false">
     <el-table-column prop="id" label="id" width="80"></el-table-column>
-    <el-table-column prop="eid" label="考试名称"></el-table-column>
-    <el-table-column prop="uid" label="学生姓名" width="80"></el-table-column>
-    <el-table-column prop="examinfo.exam_name" label="考试信息" width="80"></el-table-column>
+    <el-table-column prop="examinfo.exam_name" label="考试名称" width="80"></el-table-column>
+    <el-table-column prop="username" label="学生账号" width="80"></el-table-column>
     <el-table-column prop="time" label="提交时间"></el-table-column>
     <el-table-column prop="score" label="分数"></el-table-column>
     <el-table-column label="操作">
@@ -160,17 +159,23 @@ export default {
       filteredData: [],
       selectedExamName: '',
       activeName: 'first',
+      stable:[],
+      uid:[],
+      abc:{}
     }
   },
   created() {
-    this.load()
+    this.fetchData();
   },
   methods:{
+    handleClick(tab){
+      this.fetchData();
+    },
     toDel(id){
       this.request.post("http://localhost:9090/exam/del/"+id+"").then(res =>{
         if (res.data){
           this.$message.success("删除成功")
-          this.load()
+          this.fetchData();
         }else {
           this.$message.error("删除失败")
         }
@@ -198,15 +203,41 @@ export default {
         console.log(res.data.records.eid)
       })
     },
+    fetchData(){
+      this.uid = JSON.parse(localStorage.getItem("user")).id
+      console.log(this.uid)
+      this.stable = this.activeName =="first"?0:1;
+      this.request
+        .post("http://localhost:8086/studentpaper/listByStableAndClass?stable="+this.stable+"&uid="+this.uid+"&page="+this.pagenum+"&size="+this.pagesize+"")
+      .then(res=>{
+        this.tabledata = res.data.records
+        this.total = res.data.total
+
+        // 解析 examinfo
+        const parsedRecords = res.data.records.map((record) => {
+          const parsedExaminfo = JSON.parse(record.examinfo);
+          return {
+            ...record,
+            examinfo: parsedExaminfo,
+          };
+        });
+
+        this.tabledata = parsedRecords;
+        this.filteredData = parsedRecords;
+        this.updateOptions();
+        console.log(this.tabledata)
+        console.log(res.data.records.eid)
+      })
+    },
     handleSizeChange(pagesize){
       console.log(pagesize)
       this.pagesize=pagesize
-      this.load()
+      this.fetchData();
     },
     handleCurrentChange(pagenum){
       console.log(pagenum)
       this.pagenum=pagenum
-      this.load()
+      this.fetchData();
     },
     AddDiaLog(){
       this.dialogFormVisible=true
@@ -222,7 +253,7 @@ export default {
       this.request.post("http://localhost:9090/exam/del/batch",ids).then(res => {
         if (res.code === '200'){
           this.$message.success("删除成功")
-          this.load()
+          this.fetchData();
         }else{
           this.$message.error("删除失败")
         }
