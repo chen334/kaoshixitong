@@ -3,10 +3,10 @@
   <el-form label-width="80px" size="small" :model="user">
     <div style="text-align: center;margin: 10px 0">
       <el-upload
+          :action="uploadimg"
           class="avatar-uploader "
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
-          :before-upload="customHttpRequest"
           >
         <img v-if="user.url" :src="user.url" alt="" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -115,6 +115,11 @@ export default {
       } catch (error) {
         console.error('Upload error:', error);
       }
+    },
+    uploadimg(file){
+      this.user = JSON.parse(localStorage.getItem("user"))
+      console.log(this.user.id)
+      // console.log(file)
     }
   }
 }

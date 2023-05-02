@@ -227,7 +227,6 @@ export default {
     },
     load(){
       this.request.get("http://localhost:8086/question/page?pagenum="+this.pagenum+"&pagesize="+this.pagesize+"&type="+this.type+"").then(res =>{
-
         console.log(res)
         this.tabledata = res.data.records
         this.total = res.data.total

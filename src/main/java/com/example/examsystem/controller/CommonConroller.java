@@ -80,6 +80,32 @@ public class CommonConroller {
 //        }
 //    }
 
+    /**
+     * 文件上传统一处理方法
+     * @param file 文件
+     * @return String
+     */
+    @PostMapping("/saveimg")
+    public String saveimg(MultipartFile file){
+        String rootPath = System.getProperty("user.dir")+"/src/main/resources/static";
+        // 获取上传的文件名
+        String oldFileName = file.getOriginalFilename();
+        // 获取文件后缀名
+        String suffix = oldFileName.substring(oldFileName.lastIndexOf("."));
+        // 构造新的文件名
+        String fileName = System.currentTimeMillis()+""+ UUID.randomUUID()+suffix;
+        // 构造文件存储路径
+        File destFile = new File(rootPath+ "/" + fileName);
+        // 保存上传的文件
+        try {
+            file.transferTo(destFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return fileName;
+    }
+
     @PostMapping("/upload")
     public String upload(@RequestParam MultipartFile file, HttpSession session) throws IOException {
         log.info("111111");
@@ -115,7 +141,7 @@ public class CommonConroller {
         User saveAvege = new User();
         saveAvege.setId((Integer) session.getAttribute("user"));
         saveAvege.setUrl(url);
-        userService.updateById(saveAvege);
+        userService.saveOrUpdate(saveAvege);
 //        testMapper.insert(saveFile);
         return url;
     }

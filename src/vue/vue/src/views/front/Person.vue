@@ -3,10 +3,11 @@
   <el-form label-width="80px" size="small" :model="user">
     <div style="text-align: center;margin: 10px 0">
       <el-upload
+          action="http://localhost:8086/common/saveimg"
           class="avatar-uploader "
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
-          :before-upload="customHttpRequest">
+          >
         <img v-if="user.url" :src="user.url" alt="" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
@@ -75,22 +76,22 @@ export default {
       this.user.url = URL.createObjectURL(file.raw);
       console.log(this.user.url)
     },
-    async customHttpRequest(options) {
-      const { file } = options;
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const response = this.request.post('http://localhost:8086/common/upload?file=',formData)
-
-        // 如果上传成功，调用onSuccess处理函数
-        if (response.status === 200) {
-          this.handleAvatarSuccess(response.data);
-        }
-      } catch (error) {
-        console.error('Upload error:', error);
-      }
-    }
+    // async customHttpRequest(options) {
+    //   const { file } = options;
+    //   const formData = new FormData();
+    //   formData.append('file', file);
+    //
+    //   try {
+    //     const response = this.request.post('http://localhost:8086/common/upload?file=',formData)
+    //
+    //     // 如果上传成功，调用onSuccess处理函数
+    //     if (response.status === 200) {
+    //       this.handleAvatarSuccess(response.data);
+    //     }
+    //   } catch (error) {
+    //     console.error('Upload error:', error);
+    //   }
+    // }
   }
 }
 </script>
