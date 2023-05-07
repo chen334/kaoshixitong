@@ -73,7 +73,6 @@ export default {
       this.exam = res.data
       let utcDate = new Date(this.exam.exam_time)
       this.exam.exam_time = utcDate.toLocaleString();
-      console.log(res)
       this.timeRemaining = this.exam.exam_time * 60;
       this.startTimer()
     })
@@ -90,7 +89,7 @@ export default {
       console.log(this.question)
       console.log(this.exam.id)
       console.log(this.eid)
-      this.request.post("http://localhost:8086/studentpaper/save",{uid:this.user.id,eid:this.eid,ename:this.exam.exam_name,paper:JSON.stringify(this.question),examinfo:JSON.stringify(this.exam)}).then(res =>{
+      this.request.post("http://localhost:8086/studentpaper/stusave",{uid:this.user.id,eid:this.eid,ename:this.exam.exam_name,paper:JSON.stringify(this.question),examinfo:JSON.stringify(this.exam),classId:this.user.classId}).then(res =>{
         if (res.code=='1'){
           this.$message.success("提交成功")
           this.$router.push('/front')

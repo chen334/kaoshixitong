@@ -37,7 +37,7 @@ export default {
     // user:Object
   },
   created() {
-
+      this.load()
   },
   computed: {
     currentPathName(){
@@ -63,6 +63,17 @@ export default {
       this.$router.push("/")
       localStorage.removeItem("user")
       this.$message.success("退出成功")
+    },
+    load(){
+      // console.log(this.user)
+      const uid = this.user.id
+      this.request.post("http://localhost:8086/user/geturl", {uid: uid}).then(res =>{
+        if (res.data){
+          console.log(res)
+          console.log(res.data[0].url)
+          this.user.url = res.data[0].url
+        }
+      })
     },
   },
   async logout() {

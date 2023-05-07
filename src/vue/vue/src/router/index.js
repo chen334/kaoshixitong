@@ -36,7 +36,7 @@ const routes = [
     component: () => import('../views/front/Front'),
     redirect:"/front/home",
     children: [
-      {path:"home",name:'Home',component:() => import('../views/front/GHome.vue')},
+      {path:"home",name:'Home',component:() => import('../views/front/PhoneHome.vue')},
       {path:"exam",name:'FrontExam',component:() => import('../views/front/Exam.vue')},
       {path:"person",name:'个人信息',component:()=>import('../views/front/Person')}
     ]

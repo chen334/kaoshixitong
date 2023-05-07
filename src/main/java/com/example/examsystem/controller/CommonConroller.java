@@ -107,8 +107,9 @@ public class CommonConroller {
     }
 
     @PostMapping("/upload")
-    public String upload(@RequestParam MultipartFile file, HttpSession session) throws IOException {
+    public String upload(@RequestParam MultipartFile file,@RequestParam int uid, HttpSession session) throws IOException {
         log.info("111111");
+        log.info(String.valueOf(uid));
         String originalFilename =file.getOriginalFilename();
         String type= FileUtil.extName(originalFilename);
         long size=file.getSize();
@@ -139,9 +140,10 @@ public class CommonConroller {
 //        saveFile.setUrl(url);
 //        log.info(String.valueOf(session.getAttribute("user")));
         User saveAvege = new User();
-        saveAvege.setId((Integer) session.getAttribute("user"));
+        saveAvege.setId(uid);
         saveAvege.setUrl(url);
-        userService.saveOrUpdate(saveAvege);
+        log.info(String.valueOf(saveAvege));
+        userService.updateById(saveAvege);
 //        testMapper.insert(saveFile);
         return url;
     }

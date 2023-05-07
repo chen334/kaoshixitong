@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ExamService extends IService<Exam> {
     public List<Exam> listByStable(int stable);
+
+    String getEaxmnameByEid(Integer eid);
 }

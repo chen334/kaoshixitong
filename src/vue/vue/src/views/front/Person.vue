@@ -3,11 +3,11 @@
   <el-form label-width="80px" size="small" :model="user">
     <div style="text-align: center;margin: 10px 0">
       <el-upload
-          action="http://localhost:8086/common/saveimg"
+          action="http://localhost:8086/common/saveimg/"
           class="avatar-uploader "
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
-          >
+          :before-upload="customHttpRequest">
         <img v-if="user.url" :src="user.url" alt="" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
@@ -92,6 +92,9 @@ export default {
     //     console.error('Upload error:', error);
     //   }
     // }
+    async printUserId(){
+      console.log(this.user.id)
+    }
   }
 }
 </script>

@@ -1,42 +1,56 @@
 <template>
   <div>
-    <div class="ghome">
-      <div class="content">
-        <component :is="currentComponent"></component>
-      </div>
-      <div class="tabs">
-        <el-button @click="currentComponent = 'CurrentExamContent'">首页</el-button>
-        <el-button @click="currentComponent = 'SubmittedContent'">已提交</el-button>
-        <el-button @click="currentComponent = 'GradedContent'">评分完成</el-button>
-        <el-button @click="currentComponent = 'MyPage'">我的</el-button>
+    <el-tabs v-model="activeName" @tab-click="handleClick" onchange="handleClick">
+      <el-tab-pane label="当前考试" name="first">当前考试</el-tab-pane>
+      <el-tab-pane label="已提交" name="second">已提交</el-tab-pane>
+      <el-tab-pane label="评分完成" name="third">评分完成</el-tab-pane>
+    </el-tabs>
+    <div class="exam-container">
+      <div class="exam-card" v-for="item in tabeldata" :key="item.id">
+        <div class="exam-title">{{item.name}}</div>
+        <div class="exam-details">
+          <span>考试名称：{{item.exam.exam_name}}</span>
+          <span>教室：{{item.exam.exam_room}}</span>
+          <span>老师：{{item.exam.teacher}}</span>
+          <span>考试时间：{{item.exam.exam_time}}分</span>
+          <span>考试时长：{{item.exam.exam_duration}}分</span>
+        </div>
+        <el-button
+            style="margin-left: 20px"
+            type="primary"
+            :disabled="!isExamTime(item.exam.exam_time)"
+            @click="doexam(item)"
+            v-if="stable == 0"
+        >{{ isExamTime(item.exam.exam_time) ? "开始考试" : "未到考试时间" }}
+        </el-button>
+        <el-button
+            v-if="stable == 1"
+            size="small"
+            type="primary"
+            :disabled="true"
+        >
+          已提交试卷
+        </el-button>
+        <template v-if="stable == 2">
+        <span :class="['score',{'text-green': item.score >= 60, 'text-red': item.score < 60}]">
+          {{ item.score }}
+        </span>
+        </template>
       </div>
     </div>
-
   </div>
 </template>
 
 
 <script>
-import CurrentExamContent from './CurrentExamContent.vue';
-import SubmittedContent from './SubmittedContent.vue';
-import GradedContent from './GradedContent.vue';
-import MyPage from './Person.vue';
-
 export default {
   name: "FrontHome",
-  components: {
-    CurrentExamContent,
-    SubmittedContent,
-    GradedContent,
-    MyPage
-  },
   data(){
     return {
       tabeldata:{},
       activeName: 'first',
       stable: 1,
-      user:{},
-      currentComponent: 'CurrentExamContent'
+      user:{}
     }
   },
   created() {
@@ -252,18 +266,5 @@ export default {
   position: relative;
   top: 0;
   right: 0;
-}
-/*5.3手机端*/
-.ghome {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-}
-
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px 0;
 }
 </style>

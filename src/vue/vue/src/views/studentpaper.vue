@@ -7,13 +7,13 @@
     </div>
 
     <div style="margin: 10px 0">
-      <el-select v-model="selectedExamName" placeholder="按账号类型分类: " @change="selectByType">
+      <el-select v-model="classId" placeholder="按账号类型分类: " @change="fetchData">
+        <el-option label="显示所有" :value="'all'"></el-option>
         <el-option
-            v-if="examName.examinfo && examName.examinfo.exam_name"
-            v-for="examName  in tabledata"
-            :key="examName.examinfo.exam_name"
-            :label="examName.examinfo.exam_name"
-            :value="examName.examinfo.exam_name"
+            v-for="list  in listclass"
+            :key="list"
+            :label="list"
+            :value="list"
         >
         </el-option>
       </el-select>
@@ -38,7 +38,7 @@
 
   <el-table :data="tabledata" @selection-change="handleSelectionChange" width="30%" :close-on-click-model="false">
     <el-table-column prop="id" label="id" width="80"></el-table-column>
-    <el-table-column prop="examinfo.exam_name" label="考试名称" width="80"></el-table-column>
+    <el-table-column prop="examname" label="考试名称" width="80"></el-table-column>
     <el-table-column prop="username" label="学生账号" width="80"></el-table-column>
     <el-table-column prop="time" label="提交时间"></el-table-column>
     <el-table-column prop="score" label="分数"></el-table-column>
@@ -157,15 +157,19 @@ export default {
       user1:{},
       question:{},
       filteredData: [],
-      selectedExamName: '',
       activeName: 'first',
       stable:[],
       uid:[],
-      abc:{}
+      abc:{},
+      classId:'all',
+      listclass:{}
     }
   },
   created() {
     this.fetchData();
+    this.request.get("http://localhost:8086/studentpaper/listClass").then(res=>{
+      this.listclass = res.data
+    })
   },
   methods:{
     handleClick(tab){
@@ -181,38 +185,17 @@ export default {
         }
       })
     },
-    load(){
-      this.request.get("http://localhost:8086/studentpaper/page?pagenum="+this.pagenum+"&pagesize="+this.pagesize+"&filename="+this.filename+"").then(res =>{
-        console.log(res)
-        this.tabledata = res.data.records
-        this.total = res.data.total
-
-        // 解析 examinfo
-        const parsedRecords = res.data.records.map((record) => {
-          const parsedExaminfo = JSON.parse(record.examinfo);
-          return {
-            ...record,
-            examinfo: parsedExaminfo,
-          };
-        });
-
-        this.tabledata = parsedRecords;
-        this.filteredData = parsedRecords;
-        this.updateOptions();
-        console.log(this.tabledata)
-        console.log(res.data.records.eid)
-      })
-    },
     fetchData(){
       this.uid = JSON.parse(localStorage.getItem("user")).id
-      console.log(this.uid)
       this.stable = this.activeName =="first"?0:1;
       this.request
-        .post("http://localhost:8086/studentpaper/listByStableAndClass?stable="+this.stable+"&uid="+this.uid+"&page="+this.pagenum+"&size="+this.pagesize+"")
-      .then(res=>{
+          .post(`http://localhost:8086/studentpaper/listByStableAndClass?uid=${this.uid}&page=${this.pagenum}
+          &size=${this.pagesize}&stable=${this.stable}&classId=${this.classId}`)
+          .then(res=>{
         this.tabledata = res.data.records
         this.total = res.data.total
 
+            console.log(res)
         // 解析 examinfo
         const parsedRecords = res.data.records.map((record) => {
           const parsedExaminfo = JSON.parse(record.examinfo);
@@ -225,17 +208,13 @@ export default {
         this.tabledata = parsedRecords;
         this.filteredData = parsedRecords;
         this.updateOptions();
-        console.log(this.tabledata)
-        console.log(res.data.records.eid)
       })
     },
     handleSizeChange(pagesize){
-      console.log(pagesize)
       this.pagesize=pagesize
       this.fetchData();
     },
     handleCurrentChange(pagenum){
-      console.log(pagenum)
       this.pagenum=pagenum
       this.fetchData();
     },
@@ -245,59 +224,16 @@ export default {
     },
     handleSelectionChange(val){
       this.multipleSelection = val
-      console.log(val)
-    },
-    delBatch(){
-      let ids = this.multipleSelection.map( v=> v.id)
-      console.log("ids is :"+ids)
-      this.request.post("http://localhost:9090/exam/del/batch",ids).then(res => {
-        if (res.code === '200'){
-          this.$message.success("删除成功")
-          this.fetchData();
-        }else{
-          this.$message.error("删除失败")
-        }
-      })
-    },
-    handleFileUploadSuccess(res){
-      console.log(res)
     },
     download(url){
       window.open(url)
     },
-    changeEnable(row){
-      this.request.post("http://localhost:9090/file/update",row).then(res =>{
-        if (res.code === '200'){
-          this.$message.success("操作成功")
-        }
-      })
-    },
     takePaper(id,cid){
       this.user1 = {type1:4,type2:4,type3:4,pid:id,cid:cid}
-      console.log(id)
-      console.log(cid)
       this.dialogFormVisible1 = true;
     },
-    generatePaper(){
-      console.log(this.user1)
-      this.request.post("http://localhost:9090/exam/takePaper",this.user1).then(res =>{
-        if (res.code ==='200'){
-          this.$message.success("组卷成功")
-          this.dialogFormVisible1=false
-        }else {
-          this.$message.error(res.msg)
-        }
-      })
-    },
-    viewPaper(pid){
-      this.request.get("http://localhost:9090/exam/view/"+pid).then(res=>{
-        console.log(res)
-          this.question =res.data
-        this.dialogFormVisible2 = true
-      })
-    },
     exp(){
-      window.open("http://localhost:9090/studentpaper/export")
+      window.open("http://localhost:8086/studentpaper/export")
     },
     updateOptions() {
       const examNames = [...new Set(this.tabledata.map((record) => record.examinfo.exam_name))];
@@ -305,13 +241,6 @@ export default {
         label: examName,
         value: examName,
       }));
-    },
-    selectByType() {
-      if (this.type) {
-        this.filteredData = this.tabledata.filter((record) => record.examinfo.exam_name === this.type);
-      } else {
-        this.filteredData = this.tabledata;
-      }
     },
     changestable(){
       if (this.activeName == 'first'){
@@ -322,20 +251,7 @@ export default {
         this.stable=2
       }
     },
-  },
-  computed: {
-    // uniqueExamNames() {
-    //   // 从 tabledata 中提取唯一的考试名称
-    //   const examNamesSet = new Set(
-    //       this.tabledata
-    //           .map(item => JSON.parse(item.examinfo))
-    //           .map(examInfo => examInfo.exam_name)
-    //   );
-    //   console.log("111111111111111111")
-    //   console.log(Array.from(examNamesSet))
-    //   return Array.from(examNamesSet);
-    // },
-  },
+  }
 }
 </script>
 

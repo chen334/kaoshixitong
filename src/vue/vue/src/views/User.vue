@@ -92,6 +92,9 @@
         <el-form-item label="地址" >
           <el-input v-model="user.address" autocomplete="off"></el-input>
         </el-form-item>
+        <el-form-item label="学生1老师2" >
+          <el-input v-model="user.type" autocomplete="off"></el-input>
+        </el-form-item>
         <el-form-item label="适用班级">
           <el-select v-model="selectedClasses" multiple placeholder="请选择适用班级">
             <el-option

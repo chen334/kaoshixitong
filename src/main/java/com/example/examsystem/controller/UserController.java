@@ -32,7 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
@@ -149,6 +151,13 @@ public class UserController {
         List<User> list = reader.readAll(User.class);
         userService.saveBatch(list);
         return R.success(true);
+    }
+
+    @PostMapping("/geturl")
+    public R geturl(@RequestBody Map<String, Integer> params){
+        int uid = params.get("uid");
+        log.info(String.valueOf(uid));
+        return R.success(userService.listByIds(Collections.singleton(uid)));
     }
 
 //    @PostMapping("/importUsers")

@@ -3,10 +3,12 @@
   <el-form label-width="80px" size="small" :model="user">
     <div style="text-align: center;margin: 10px 0">
       <el-upload
-          :action="uploadimg"
+          action="http://localhost:8086/common/upload"
           class="avatar-uploader "
           :show-file-list="false"
           :on-success="handleAvatarSuccess"
+          :before-upload="uploadimg"
+          :data="{uid:this.user.id}"
           >
         <img v-if="user.url" :src="user.url" alt="" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
@@ -47,7 +49,7 @@ export default {
       imageUrl:{},
       dialogImageUrl: '',
       dialogVisible: false,
-      disabled: false
+      disabled: false,
     }
   },
   created() {
@@ -55,7 +57,15 @@ export default {
   },
   methods:{
     load(){
-      console.log(this.user)
+      // console.log(this.user)
+      const uid = this.user.id
+      this.request.post("http://localhost:8086/user/geturl", {uid: uid}).then(res =>{
+        if (res.data){
+          console.log(res)
+          console.log(res.data[0].url)
+          this.user.url = res.data[0].url
+        }
+      })
     },
     tosave(){
       this.request.post("http://localhost:8086/test/save", this.user).then(res => {
@@ -117,9 +127,7 @@ export default {
       }
     },
     uploadimg(file){
-      this.user = JSON.parse(localStorage.getItem("user"))
-      console.log(this.user.id)
-      // console.log(file)
+      window.location.reload()
     }
   }
 }
