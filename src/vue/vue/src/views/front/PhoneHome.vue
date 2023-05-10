@@ -19,9 +19,10 @@
         <el-button
             style="margin-left: 20px"
             type="primary"
-
             @click="doexam(item)"
             v-if="stable == 0"
+            :disabled="!isExamTime(item)"
+            :class="{'is-disabled':!isExamTime(item)}"
         >{{ isExamTime(item) ? "开始考试" : "未到考试时间" }}
         </el-button>
         <el-button
@@ -51,7 +52,9 @@ export default {
       tabeldata:{},
       activeName: 'first',
       stable: 1,
-      user:{}
+      user:{},
+      startList:[],
+      notStartList:[]
     }
   },
   created() {
@@ -132,6 +135,19 @@ export default {
       console.log(examEndTime)
       return currentTime >= examStartTime && currentTime < examEndTime;
     }
+  },
+  mounted() {
+    this.startList = this.tabeldata.filter(item =>{
+      return this.isExamTime(item)
+    });
+    this.notStartList = this.tabeldata.filter(item =>{
+      return !this.isExamTime(item)
+    })
+    console.log("startList")
+    console.log(this.startList)
+    console.log("notstartList")
+    console.log(this.notStartList)
+    console.log('Component mounted.')
   }
 }
 </script>
@@ -283,5 +299,10 @@ export default {
   position: relative;
   top: 0;
   right: 0;
+}
+
+.is-disabled {
+  background-color: #ccc;
+  font-size: 14px;
 }
 </style>
