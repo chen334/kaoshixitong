@@ -119,8 +119,16 @@
             <el-date-picker
                 v-model="user.exam_time"
                 type="datetime"
-                placeholder="选择日期时间">
+                placeholder="选择开始日期">
             </el-date-picker>
+            </el-form-item>
+
+            <el-form-item label="结束日期">
+              <el-date-picker
+                  v-model="user.exam_endtime"
+                  type="datetime"
+                  placeholder="选择开始日期">
+              </el-date-picker>
             </el-form-item>
 
             <el-form-item label="持续时间" >
@@ -150,7 +158,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="组卷" :visible.sync="dialogFormVisible1" width="30%">
+    <el-dialog title="自动组卷" :visible.sync="dialogFormVisible1" width="30%">
       <el-form label-width="80px" size="small" >
         <el-form-item label="选择题数量" >
           <el-input v-model="user1.type1" autocomplete="off"></el-input>
@@ -251,14 +259,8 @@ export default {
   },
   methods:{
     tosave(){
-      console.log(88888888)
-      console.log(this.selectedClasses);
-      console.log(this.user.classId);
-      console.log(888888)
       this.user.classId = this.selectedClasses;
       this.user.classId = this.user.classId.join(',');
-      console.log(this.user.classId)
-      console.log(this.user)
       this.request.post("http://localhost:8086/exam/save",this.user).then(res => {
         if (res.data){
           this.dialogFormVisible=false
@@ -339,10 +341,24 @@ export default {
       })
     },
     takePaper(id,cid){
-      this.user1 = {type1:4,type2:4,type3:4,eid:id,cid:cid}
-      console.log(id)
-      console.log(cid)
-      this.dialogFormVisible1 = true;
+      this.request.get("http://localhost:8086/exam/checkStudentPaper?eid="+id+"").then(res =>{
+        console.log(res.data)
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          this.$confirm("当前试卷已组有题库，如果重组当前题库将失效。是否继续？", "提示", {
+            confirmButtonText: "确定",
+            cancelButtonText: "取消",
+            type: "warning"
+          }).then(() => {
+            this.user1 = { type1: 4, type2: 4, type3: 4, eid: id, cid: cid };
+            this.dialogFormVisible1 = true;
+          }).catch(() => {
+            // 用户取消操作
+          });
+        }else {
+          this.user1 = { type1: 4, type2: 4, type3: 4, eid: id, cid: cid };
+          this.dialogFormVisible1 = true;
+        }
+      })
     },
     handlePaper(id,cid){
       this.request.get("http://localhost:8086/question/list").then(res =>{

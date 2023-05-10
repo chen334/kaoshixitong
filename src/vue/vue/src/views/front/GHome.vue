@@ -92,6 +92,13 @@ export default {
         this.$message.warning("未到考试时间");
       }
     },
+    detectionTime(){
+      const currentTime = new Date();
+      const examStartTime = new Date(item.exam.exam_time);
+      if (currentTime < examStartTime) {
+
+      }
+    },
     isExamTime(startTime) {
       const currentTime = new Date();
       const examStartTime = new Date(startTime);

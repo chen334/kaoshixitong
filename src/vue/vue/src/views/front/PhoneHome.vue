@@ -13,15 +13,16 @@
           <span>教室：{{item.exam.exam_room}}</span>
           <span>老师：{{item.exam.teacher}}</span>
           <span>考试时间：{{item.exam.exam_time}}分</span>
+          <span>结束时间：{{item.exam.exam_endtime}}分</span>
           <span>考试时长：{{item.exam.exam_duration}}分</span>
         </div>
         <el-button
             style="margin-left: 20px"
             type="primary"
-            :disabled="!isExamTime(item.exam.exam_time)"
+
             @click="doexam(item)"
             v-if="stable == 0"
-        >{{ isExamTime(item.exam.exam_time) ? "开始考试" : "未到考试时间" }}
+        >{{ isExamTime(item) ? "开始考试" : "未到考试时间" }}
         </el-button>
         <el-button
             v-if="stable == 1"
@@ -67,13 +68,23 @@ export default {
         // this.tabeldata = res.data
         this.tabeldata = res.data.map(data => {
           // 对每个 record 的 exam_time 属性进行时区转换
-          console.log("123123")
-          console.log(data.exam_time)
+          console.log("examtime")
+          console.log(data.exam.exam_time)
           let utcDate = new Date(data.exam.exam_time);
           data.exam.exam_time = utcDate.toLocaleString();
-          data.score = data.score;
-          console.log("1111111")
-          console.log(data.score); // 这里可以访问 score 字段
+          console.log("now examtime")
+          console.log(data.exam.exam_time)
+          if (data.exam.exam_endtime!=null){
+            console.log("endTime")
+            console.log(data.exam.exam_endtime)
+            let utcEndDate = new Date(data.exam.exam_endtime);
+            data.exam.exam_endtime = utcEndDate.toLocaleString();
+            console.log("now endTime")
+            console.log(data.exam.exam_endtime)
+          }
+          // data.score = data.score;
+          // console.log("1111111")
+          // console.log(data.score); // 这里可以访问 score 字段
           return data;
         });
       })
@@ -95,25 +106,31 @@ export default {
       console.log(item)
       const currentTime = new Date();
       const examStartTime = new Date(item.exam.exam_time);
+      const examEndTime = new Date(item.exam.exam_endtime);
       console.log("currenttime")
       console.log(currentTime)
       console.log("examStartime")
-      console.log(item.exam.exam_time)
       console.log(examStartTime)
-      if (currentTime >= examStartTime) {
+      if (currentTime >= examStartTime && currentTime < examEndTime) {
         this.$router.push("/front/exam?eid=" + item.exam.id);
       } else {
         this.$message.warning("未到考试时间");
       }
     },
-    isExamTime(startTime) {
+    isExamTime(item) {
       const currentTime = new Date();
-      const examStartTime = new Date(startTime);
+      console.log("starTime")
+      console.log(item.exam.exam_time)
+      const examStartTime = new Date(item.exam.exam_time);
+      const examEndTime = new Date(item.exam.exam_endtime);
+      // examEndTime.setMinutes(examEndTime.getMinutes()+item.exam.exam_duration)
       console.log("现在")
       console.log(currentTime)
       console.log("考试")
       console.log(examStartTime)
-      return currentTime >= examStartTime;
+      console.log("终结时间")
+      console.log(examEndTime)
+      return currentTime >= examStartTime && currentTime < examEndTime;
     }
   }
 }

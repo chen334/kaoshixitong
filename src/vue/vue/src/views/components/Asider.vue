@@ -1,6 +1,6 @@
 <template>
   <el-menu :default-openeds="['1', '3']" style="min-height: 100vh;overflow-x: hidden"
-           background-color="rgb(48,65,86)"
+           background-color="#333"
            text-color="#fff"
            active-text-color="#ffd04b"
            :collapse-transition="false"

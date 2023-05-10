@@ -1,17 +1,17 @@
 <template>
 
     <el-container style="min-height: 100vh;">
-      <el-aside :width="sideWidth +'px'" style="background-color: rgb(238, 241, 246);height: 100%;box-shadow: 2px 0 6px rgb(0 21 41 / 35%)">
+      <el-aside :width="sideWidth +'px'" style="background-color: rgb(238, 241, 246);min-height: 100vh;box-shadow: 2px 0 6px rgb(0 21 41 / 35%);background-color: #333;">
           <Aside :isCollapse="isCollapse" :logoTextShow="logoTextShow" />
       </el-aside>
 
       <el-container>
 
         <el-header style="border-bottom: 1px solid #ccc;">
-          <Header :collapseBtnClass="collapseBtnClass" :collapse="collapse" :user="user"></Header>
+          <Header :collapseBtnClass="collapseBtnClass" :collapse="collapse"></Header>
         </el-header>
         <el-main>
-          <router-view @refreshUser="getUser"/>
+          <router-view/>
         </el-main>
       </el-container>
     </el-container>
@@ -47,7 +47,7 @@ export default {
     }
   },
   created() {
-      this.getUser()
+      // this.getUser()
   },
   components: {
     Aside,
@@ -66,14 +66,14 @@ export default {
         this.logoTextShow=true
       }
     },
-    getUser(){
-      let username=localStorage.getItem("user")?JSON.parse(localStorage.getItem("user")).username:""
-      if (username){
-        this.request.get("/user/username/"+username).then(res=>{
-          this.user =res.data
-        })
-      }
-    }
+    // getUser(){
+    //   let username=localStorage.getItem("user")?JSON.parse(localStorage.getItem("user")).username:""
+    //   if (username){
+    //     this.request.get("/user/username/"+username).then(res=>{
+    //       this.user =res.data
+    //     })
+    //   }
+    // }
   }
 }
 </script>

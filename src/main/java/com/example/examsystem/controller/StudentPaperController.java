@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.examsystem.common.R;
+import com.example.examsystem.dto.StudentPaperDto;
 import com.example.examsystem.entity.Exam;
 import com.example.examsystem.entity.StudentPaper;
 import com.example.examsystem.service.ExamService;
@@ -55,7 +56,7 @@ public class StudentPaperController {
     private R stusave(@RequestBody StudentPaper studentPaper,HttpSession session) {
         int id = 0;
         Integer uid = studentPaper.getUid();
-        Integer eid = studentPaper.getEid();
+        String eid = studentPaper.getEid();
         int count = studentPaperService.count(new QueryWrapper<StudentPaper>().eq("uid", uid).eq("eid",eid));
         if (count > 0) {
             // 学生ID已存在，返回错误信息
@@ -78,18 +79,21 @@ public class StudentPaperController {
     }
 
     @PostMapping("/listByStableAndClass")
-    public R listByStableAndClass(@RequestParam int uid,@RequestParam int page,@RequestParam int size,@RequestParam int stable,@RequestParam String classId){
-    log.info(String.valueOf(classId));
+    public R listByStableAndClass(@RequestBody StudentPaperDto studentPaperDto){
+    log.info(String.valueOf(studentPaperDto.getClassId()));
     log.info("111111111111111111111");
-                Page<Map<String,Object>> pageParam = new Page<>(page,size);
+                Page<Map<String,Object>> pageParam = new Page<>(studentPaperDto.getPage(),studentPaperDto.getSize());
                 IPage<Map<String,Object>> resultPage;
-                if (!classId.equals("all")){
+//                if (!studentPaperDto.getClassId().equals("all")){
                     log.info("进1");
-                    resultPage = studentPaperService.getFilteredPageByStableAndClass(uid,pageParam,stable,classId);
-                }else {
-                    log.info("进2");
-                    resultPage = studentPaperService.getFilteredPageByStableAndClass(uid,pageParam,stable);
-                }
+                    resultPage = studentPaperService.getFilteredPageByStableAndClass(pageParam,studentPaperDto);
+//                }else {
+//                    log.info("进2");
+//                    resultPage = studentPaperService.getFilteredPageByStableAndClass(uid,pageParam,stable);
+//                }
+//                if (!Ename.equals("all")){
+//                    log.info("ename进1");
+//                }
         for (Map<String,Object> record : resultPage.getRecords()){
             Integer userId = (Integer) record.get("uid");
             if (userId!=null){
@@ -114,7 +118,7 @@ public class StudentPaperController {
         LambdaQueryWrapper<StudentPaper> queryWrapper  = new LambdaQueryWrapper<>();
         queryWrapper.select(StudentPaper::getClassId).groupBy(StudentPaper::getClassId);
         List<StudentPaper> studentPapers = studentPaperService.list(queryWrapper);
-        List<Integer> distinctClassIds = studentPapers.stream()
+        List<String> distinctClassIds = studentPapers.stream()
                 .map(StudentPaper::getClassId)
                 .collect(Collectors.toList());
         return R.success(distinctClassIds);
@@ -125,8 +129,15 @@ public class StudentPaperController {
         StudentPaper byId = studentPaperService.getById(sp);
         return R.success(byId);
     }
+
     @GetMapping("/listAll")
     public R list(){
         return R.success(studentPaperService.list());
+    }
+
+    @GetMapping("/listEname")
+    public R listEname(){
+        List<Exam> examname= studentPaperService.SelectExamName();
+        return R.success(examname);
     }
 }

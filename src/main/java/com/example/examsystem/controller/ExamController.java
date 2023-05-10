@@ -290,4 +290,11 @@ public class ExamController {
         Object user1 = servletRequest.getSession().getAttribute("user");
         log.info((String) user1);
     }
+
+    @GetMapping("/checkStudentPaper")
+    public R checkStudentPaper(@RequestParam Integer eid){
+        LambdaQueryWrapper<QuestionPaper> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(QuestionPaper::getEid,eid);
+        return R.success(questionPaperService.list(queryWrapper));
+    }
 }

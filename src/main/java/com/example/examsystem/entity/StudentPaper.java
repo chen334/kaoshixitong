@@ -12,8 +12,8 @@ public class StudentPaper {
     private String examinfo;
     private String exam_name;
     private Integer exam_stable;
-    private Integer classId;
-    private Integer eid;
+    private String classId;
+    private String eid;
     private Integer uid;
     private String time;
     private Integer score;

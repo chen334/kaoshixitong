@@ -1,10 +1,10 @@
 <template>
   <div>
 
-    <div style="padding: 10px 0">
-      <el-input style="width: 200px" placeholder="请输入名称" suffix-icon="el-icon-search" v-model="filename"></el-input>
-      <el-button class="ml-5" type="primary" @click="load">搜索</el-button>
-    </div>
+<!--    <div style="padding: 10px 0">-->
+<!--      <el-input style="width: 200px" placeholder="请输入名称" suffix-icon="el-icon-search" v-model="filename"></el-input>-->
+<!--&lt;!&ndash;      <el-button class="ml-5" type="primary" @click="load">搜索</el-button>&ndash;&gt;-->
+<!--    </div>-->
 
     <div style="margin: 10px 0">
       <el-select v-model="classId" placeholder="按账号类型分类: " @change="fetchData">
@@ -14,6 +14,17 @@
             :key="list"
             :label="list"
             :value="list"
+        >
+        </el-option>
+      </el-select>
+
+      <el-select v-model="Ename" placeholder="按试卷分类: " @change="fetchData">
+        <el-option label="显示所有" :value="'all'"></el-option>
+        <el-option
+            v-for="list  in listEname"
+            :key="list.id"
+            :label="list.exam_name"
+            :value="list.id"
         >
         </el-option>
       </el-select>
@@ -148,7 +159,7 @@ export default {
       multipleSelection:[],
       pagenum:1,
       pagesize:5,
-      total:{},
+      total:0,
       filename:[],
       dialogFormVisible:false,
       dialogFormVisible1:false,
@@ -162,43 +173,51 @@ export default {
       uid:[],
       abc:{},
       classId:'all',
-      listclass:{}
+      listclass:{},
+      listEname:{},
+      Ename:'all'
     }
   },
   created() {
+    // this.Ename.value="all"
     this.fetchData();
     this.request.get("http://localhost:8086/studentpaper/listClass").then(res=>{
       this.listclass = res.data
+    })
+    this.request.get("http://localhost:8086/studentpaper/listEname").then(res=>{
+      this.listEname = res.data
     })
   },
   methods:{
     handleClick(tab){
       this.fetchData();
     },
-    toDel(id){
-      this.request.post("http://localhost:9090/exam/del/"+id+"").then(res =>{
-        if (res.data){
-          this.$message.success("删除成功")
-          this.fetchData();
-        }else {
-          this.$message.error("删除失败")
-        }
-      })
-    },
+    // toDel(id){
+    //   this.request.post("http://localhost:9090/exam/del/"+id+"").then(res =>{
+    //     if (res.data){
+    //       this.$message.success("删除成功")
+    //       this.fetchData();
+    //     }else {
+    //       this.$message.error("删除失败")
+    //     }
+    //   })
+    // },
+    // .post(`http://localhost:8086/studentpaper/listByStableAndClass?uid=${this.uid}&page=${this.pagenum}
+    //       &size=${this.pagesize}&stable=${this.stable}&classId=${this.classId}`)
     fetchData(){
       this.uid = JSON.parse(localStorage.getItem("user")).id
       this.stable = this.activeName =="first"?0:1;
       this.request
-          .post(`http://localhost:8086/studentpaper/listByStableAndClass?uid=${this.uid}&page=${this.pagenum}
-          &size=${this.pagesize}&stable=${this.stable}&classId=${this.classId}`)
+            .post("http://localhost:8086/studentpaper/listByStableAndClass",{uid: this.uid,exam_stable: this.stable,classId: this.classId,eid: this.Ename,page: this.pagenum,size: this.pagesize})
           .then(res=>{
         this.tabledata = res.data.records
         this.total = res.data.total
-
-            console.log(res)
         // 解析 examinfo
         const parsedRecords = res.data.records.map((record) => {
-          const parsedExaminfo = JSON.parse(record.examinfo);
+          let parsedExaminfo=null;
+          if (record.examinfo!==undefined && record.examinfo!==null){
+             parsedExaminfo= JSON.parse(record.examinfo);
+          }
           return {
             ...record,
             examinfo: parsedExaminfo,
@@ -207,7 +226,7 @@ export default {
 
         this.tabledata = parsedRecords;
         this.filteredData = parsedRecords;
-        this.updateOptions();
+        // this.updateOptions();
       })
     },
     handleSizeChange(pagesize){

@@ -12,6 +12,7 @@ public class Exam implements Serializable {
     private String exam_name;
     private String exam_room;
     private Date exam_time;
+    private Date exam_endtime;
     private Integer exam_duration;
     private String teacher;
     private String stable;
