@@ -1,5 +1,7 @@
 <template>
-    <div style="margin-bottom: 100px" class="mobile-card">
+
+  <div style="margin-bottom: 100px" class="mobile-card">
+    <el-button type="danger" slot="reference" @click="test">test<i class="el-icon-remove-outline ml-5"></i></el-button>
       <div style="margin: 20px 0" >
         <span style="font-size: 20px;color: #333;">{{exam.exam_name}}</span>
         <span style="font-size: 20px;color: #333;margin-left: 20px">考试时间： {{exam.exam_time}}</span>
@@ -70,7 +72,10 @@ export default {
       timeRemaining: 3600,
       timer: null, // 倒计时器
       remainingTime: '', // 剩余时间字符串
-      isOver: false // 是否考试结束
+      isOver: false, // 是否考试结束
+      endtime:{},
+      startime:{},
+      timerTime:{}
     }
   },
   created() {
@@ -88,7 +93,13 @@ export default {
       console.log(this.exam.exam_duration)
       console.log(this.exam.exam_endtime)
       // this.startTimer()
-      this.startCountDown();
+      this.request.post("http://localhost:8086/exam/timer",{student_id:this.user.id,exam_id:this.exam.id}).then(res =>{
+        console.log("timer!!!!")
+        console.log(res)
+        this.timerTime = res.data[0];
+        console.log(this.timerTime.end_time)
+        this.startCountDown();
+      })
     })
 
     this.request.get("http://localhost:8086/exam/view/" + this.eid).then(res => {
@@ -122,15 +133,17 @@ export default {
     },
     startCountDown() {
       // 计算考试结束时间和剩余时间
-      const endTime = new Date(this.exam.exam_endtime);
-      const duration = new Date();
-      duration.setTime(duration.getTime() + this.exam.exam_duration * 60 * 1000)
-      const remaining = endTime - Date.now();
+      const endTime = new Date(this.timerTime.end_time);
+      // const duration = new Date();
+      // duration.setTime(duration.getTime() + this.exam.exam_duration * 60 * 1000)
+      const remaining = new Date(endTime) - Date.now();
       console.log("first")
+      console.log(this.timerTime.end_time)
+      console.log(Date.now())
       console.log(this.exam.exam_endtime)
       console.log(this.exam.exam_duration)
       console.log(endTime)
-      console.log(duration)
+      // console.log(duration)
       console.log(remaining)
 
 
@@ -142,9 +155,13 @@ export default {
 
       // 启动倒计时器
       this.timer = setInterval(() => {
-        const remaining = duration - Date.now();
+        const remaining = endTime - Date.now();
         console.log("second")
         console.log(remaining)
+        if (remaining <= 0) {
+          this.isOver = true;
+          return;
+        }
         if (remaining <= 0 && endTime<Date.now()) {
           // 倒计时结束，发出警告
           clearInterval(this.timer);
@@ -169,12 +186,22 @@ export default {
       console.log(minutes)
       console.log(hours)
       return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    },
+    test(){
+      this.request.post("http://localhost:8086/exam/timer",{student_id: 2,exam_id:24}).then(res =>{
+      })
     }
   },
   mounted() {
     // 开始倒计时
     // this.startCountDown();
-  }
+    // this.timer = setInterval(() => {
+    //   this.message = 'Hello, world! ' + new Date().toLocaleTimeString();
+    // }, 1000);
+  },
+  beforeDestroy() {
+    clearInterval(this.timer);
+  },
 }
 
 </script>

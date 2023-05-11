@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,8 @@ public class ExamController {
     private ExamMapper examMapper;
     @Autowired
     private UserService userService;
+    @Autowired
+    private StudentExamProgressService studentExamProgressService;
 
 
     @Value("${file.upload-path}")
@@ -78,7 +81,7 @@ public class ExamController {
 
     @PostMapping("/save")
     public R<Boolean> save(@RequestBody Exam exam){
-        exam.setCreate_time(new Date());
+        exam.setCreate_time(LocalDateTime.now());
         return R.success(examService.saveOrUpdate(exam));
     }
 
@@ -171,12 +174,83 @@ public class ExamController {
         return R.success(list);
     }
 
+//    @PostMapping("/list123")
+//    public R list123(@RequestParam int stable,@RequestParam int uid){
+//        LambdaQueryWrapper<StudentPaper> queryWrapper = new LambdaQueryWrapper<>();
+//        queryWrapper.eq(StudentPaper::getUid,uid);
+//        List<StudentPaper> studentPapers = studentPaperMapper.selectList(queryWrapper);
+//
+//        User user = userService.getById(uid);
+//
+//        List<Map<String, Object>> resultList = studentPapers.stream()
+//                .filter(StreamUtil.distinctByKey(StudentPaper::getEid))
+//                .map(studentPaper -> {
+//                    Map<String, Object> resultMap = new HashMap<>();
+//                    resultMap.put("eid", studentPaper.getEid());
+//                    resultMap.put("score", studentPaper.getScore());
+//                    return resultMap;
+//                }).collect(Collectors.toList());
+//
+//        LambdaQueryWrapper<Exam> examQueryWrapper = new LambdaQueryWrapper<>();
+//        List<Exam> exams = examMapper.selectList(examQueryWrapper);
+//        exams = exams.stream()
+//                .filter(exam -> Arrays.asList(exam.getClassId().split(",")).contains(Integer.toString(user.getClassId())))
+//                .collect(Collectors.toList());
+//
+//        List<Map<String, Object>> filteredExams;
+//        log.info("stable!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//        log.info(String.valueOf(stable));
+//
+//        log.info("exams!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//        log.info(String.valueOf(exams));
+//
+//        if (stable == 0) {
+//            filteredExams = exams.stream()
+//                    .filter(exam -> resultList.stream().noneMatch(result -> Objects.equals(result.get("eid"), exam.getId())))
+//                    .map(exam -> {
+//                        Map<String, Object> examMap = new HashMap<>();
+//                        examMap.put("exam", exam);
+//                        return examMap;
+//                    })
+//                    .collect(Collectors.toList());
+//        } else if (stable == 1) {
+//            filteredExams = exams.stream()
+//                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") == null))
+//                    .map(exam -> {
+//                        Map<String, Object> examMap = new HashMap<>();
+//                        examMap.put("exam", exam);
+//                        return examMap;
+//                    })
+//                    .collect(Collectors.toList());
+//        } else if (stable == 2) {
+//            filteredExams = exams.stream()
+//                    .filter(exam -> resultList.stream().anyMatch(result -> Objects.equals(result.get("eid"), exam.getId()) && result.get("score") != null))
+//                    .map(exam -> {
+//                        Map<String, Object> result = resultList.stream().filter(r -> Objects.equals(r.get("eid"), exam.getId())).findFirst().orElse(null);
+//                        Map<String, Object> examMap = new HashMap<>();
+//                        examMap.put("exam", exam);
+//                        if (result != null) {
+//                            examMap.put("score", result.get("score"));
+//                        }
+//                        return examMap;
+//                    })
+//                    .collect(Collectors.toList());
+//            log.info("filteredExams");
+//            log.info(String.valueOf(filteredExams));
+//        } else {
+//            return R.error("Invalid stable value.");
+//        }
+//        return R.success(filteredExams);
+//    }
+
     @PostMapping("/list123")
     public R list123(@RequestParam int stable,@RequestParam int uid){
         LambdaQueryWrapper<StudentPaper> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(StudentPaper::getUid,uid);
         List<StudentPaper> studentPapers = studentPaperMapper.selectList(queryWrapper);
 
+        log.info("student");
+        log.info(String.valueOf(studentPapers));
         User user = userService.getById(uid);
 
         List<Map<String, Object>> resultList = studentPapers.stream()
@@ -195,6 +269,7 @@ public class ExamController {
                 .collect(Collectors.toList());
 
         List<Map<String, Object>> filteredExams;
+        log.info("exam!!!!!");
 
         if (stable == 0) {
             filteredExams = exams.stream()
@@ -230,6 +305,7 @@ public class ExamController {
         } else {
             return R.error("Invalid stable value.");
         }
+
         return R.success(filteredExams);
     }
 
@@ -296,5 +372,39 @@ public class ExamController {
         LambdaQueryWrapper<QuestionPaper> queryWrapper = new LambdaQueryWrapper();
         queryWrapper.eq(QuestionPaper::getEid,eid);
         return R.success(questionPaperService.list(queryWrapper));
+    }
+
+    @PostMapping("/timer")
+    public R timer(@RequestBody StudentExamProgress studentExamProgress){
+        LambdaQueryWrapper<StudentExamProgress> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StudentExamProgress::getStudent_id,studentExamProgress.getStudent_id())
+                .eq(StudentExamProgress::getExam_id,studentExamProgress.getExam_id());
+        int count =studentExamProgressService.count(queryWrapper);
+        StudentExamProgress studentExamProgressGetId = studentExamProgressService.getOne(queryWrapper);
+        log.info(String.valueOf(studentExamProgressGetId));
+
+        LambdaQueryWrapper<Exam> examQueryWrapper = new LambdaQueryWrapper<>();
+        examQueryWrapper.eq(Exam::getId,studentExamProgress.getExam_id());
+        Exam exam = examService.getById(studentExamProgress.getExam_id());
+
+        studentExamProgress.setStart_time(LocalDateTime.now());
+        if (count==0){
+            studentExamProgress.setDuration(exam.getExam_duration());
+            studentExamProgress.setEnd_time(LocalDateTime.now().plusMinutes(exam.getExam_duration()));
+            log.info("endtime!!!!!");
+            log.info(String.valueOf(studentExamProgress.getEnd_time()));
+            studentExamProgressService.save(studentExamProgress);
+            return R.success(studentExamProgress);
+        }else {
+//            return R.success(studentExamProgressService.save(studentExamProgress));
+            return R.success(studentExamProgressService.list(queryWrapper));
+        }
+
+//        log.info("77777777777");
+//        log.info(String.valueOf(exam.getExam_endtime()));
+//        log.info(String.valueOf(exam.getExam_duration()));
+
+//        log.info(exam.getExam_endtime()+(exam.getExam_duration()*60));
+
     }
 }

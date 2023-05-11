@@ -6,7 +6,7 @@
       <el-tab-pane label="评分完成" name="third">评分完成</el-tab-pane>
     </el-tabs>
     <div class="exam-container">
-      <div class="exam-card" v-for="item in tabeldata" :key="item.id">
+      <div class="exam-card" v-for="item in startList" :key="item.id" >
         <div class="exam-title">{{item.name}}</div>
         <div class="exam-details">
           <span>考试名称：{{item.exam.exam_name}}</span>
@@ -39,6 +39,74 @@
         </span>
         </template>
       </div>
+
+      <div class="exam-card" v-for="item in notStartList" :key="item.id">
+        <div class="exam-title">{{item.name}}</div>
+        <div class="exam-details">
+          <span>考试名称：{{item.exam.exam_name}}</span>
+          <span>教室：{{item.exam.exam_room}}</span>
+          <span>老师：{{item.exam.teacher}}</span>
+          <span>考试时间：{{item.exam.exam_time}}分</span>
+          <span>结束时间：{{item.exam.exam_endtime}}分</span>
+          <span>考试时长：{{item.exam.exam_duration}}分</span>
+        </div>
+        <el-button
+            style="margin-left: 20px"
+            type="primary"
+            @click="doexam(item)"
+            v-if="stable == 0"
+            :disabled="!isExamTime(item)"
+            :class="{'is-disabled':!isExamTime(item)}"
+        >{{ isExamTime(item) ? "开始考试" : "未到考试时间" }}
+        </el-button>
+        <el-button
+            v-if="stable == 1"
+            size="small"
+            type="primary"
+            :disabled="true"
+        >
+          已提交试卷
+        </el-button>
+        <template v-if="stable == 2">
+        <span :class="['score',{'text-green': item.score >= 60, 'text-red': item.score < 60}]">
+          {{ item.score }}
+        </span>
+        </template>
+      </div>
+
+<!--      <div class="exam-card" v-for="item in tabeldata" :key="item.id" >-->
+<!--        <div class="exam-title">{{item.name}}</div>-->
+<!--        <div class="exam-details">-->
+<!--          <span>考试名称：{{item.exam.exam_name}}</span>-->
+<!--          <span>教室：{{item.exam.exam_room}}</span>-->
+<!--          <span>老师：{{item.exam.teacher}}</span>-->
+<!--          <span>考试时间：{{item.exam.exam_time}}分</span>-->
+<!--          <span>结束时间：{{item.exam.exam_endtime}}分</span>-->
+<!--          <span>考试时长：{{item.exam.exam_duration}}分</span>-->
+<!--        </div>-->
+<!--        <el-button-->
+<!--            style="margin-left: 20px"-->
+<!--            type="primary"-->
+<!--            @click="doexam(item)"-->
+<!--            v-if="stable == 0"-->
+<!--            :disabled="!isExamTime(item)"-->
+<!--            :class="{'is-disabled':!isExamTime(item)}"-->
+<!--        >{{ isExamTime(item) ? "开始考试" : "未到考试时间" }}-->
+<!--        </el-button>-->
+<!--        <el-button-->
+<!--            v-if="stable == 1"-->
+<!--            size="small"-->
+<!--            type="primary"-->
+<!--            :disabled="true"-->
+<!--        >-->
+<!--          已提交试卷-->
+<!--        </el-button>-->
+<!--        <template v-if="stable == 2">-->
+<!--        <span :class="['score',{'text-green': item.score >= 60, 'text-red': item.score < 60}]">-->
+<!--          {{ item.score }}-->
+<!--        </span>-->
+<!--        </template>-->
+<!--      </div>-->
     </div>
   </div>
 </template>
@@ -59,7 +127,7 @@ export default {
   },
   created() {
     this.user = JSON.parse(localStorage.getItem("user"))
-  this.get()
+    this.get()
   },
   methods:{
     get(){
@@ -71,25 +139,40 @@ export default {
         // this.tabeldata = res.data
         this.tabeldata = res.data.map(data => {
           // 对每个 record 的 exam_time 属性进行时区转换
-          console.log("examtime")
-          console.log(data.exam.exam_time)
+          // console.log("examtime")
+          // console.log(data.exam.exam_time)
           let utcDate = new Date(data.exam.exam_time);
           data.exam.exam_time = utcDate.toLocaleString();
-          console.log("now examtime")
-          console.log(data.exam.exam_time)
+          // console.log("now examtime")
+          // console.log(data.exam.exam_time)
           if (data.exam.exam_endtime!=null){
-            console.log("endTime")
-            console.log(data.exam.exam_endtime)
+            // console.log("endTime")
+            // console.log(data.exam.exam_endtime)
             let utcEndDate = new Date(data.exam.exam_endtime);
             data.exam.exam_endtime = utcEndDate.toLocaleString();
-            console.log("now endTime")
-            console.log(data.exam.exam_endtime)
+            // console.log("now endTime")
+            // console.log(data.exam.exam_endtime)
           }
           // data.score = data.score;
           // console.log("1111111")
           // console.log(data.score); // 这里可以访问 score 字段
           return data;
         });
+
+        console.log("tabledata")
+        console.log(this.tabeldata)
+
+        this.startList = this.tabeldata.filter(item =>{
+          return this.isExamTime(item)
+        });
+        this.notStartList = this.tabeldata.filter(item =>{
+          return !this.isExamTime(item)
+        })
+        console.log("tabledata")
+        console.log(this.tabeldata)
+        console.log("list!!!")
+        console.log(this.startList)
+        console.log(this.notStartList)
       })
     },
     changestable(){
@@ -106,14 +189,14 @@ export default {
       this.get()
     },
     doexam(item) {
-      console.log(item)
+      // console.log(item)
       const currentTime = new Date();
       const examStartTime = new Date(item.exam.exam_time);
       const examEndTime = new Date(item.exam.exam_endtime);
-      console.log("currenttime")
-      console.log(currentTime)
-      console.log("examStartime")
-      console.log(examStartTime)
+      // console.log("currenttime")
+      // console.log(currentTime)
+      // console.log("examStartime")
+      // console.log(examStartTime)
       if (currentTime >= examStartTime && currentTime < examEndTime) {
         this.$router.push("/front/exam?eid=" + item.exam.id);
       } else {
@@ -122,17 +205,17 @@ export default {
     },
     isExamTime(item) {
       const currentTime = new Date();
-      console.log("starTime")
-      console.log(item.exam.exam_time)
+      // console.log("starTime")
+      // console.log(item.exam.exam_time)
       const examStartTime = new Date(item.exam.exam_time);
       const examEndTime = new Date(item.exam.exam_endtime);
       // examEndTime.setMinutes(examEndTime.getMinutes()+item.exam.exam_duration)
-      console.log("现在")
-      console.log(currentTime)
-      console.log("考试")
-      console.log(examStartTime)
-      console.log("终结时间")
-      console.log(examEndTime)
+      // console.log("现在")
+      // console.log(currentTime)
+      // console.log("考试")
+      // console.log(examStartTime)
+      // console.log("终结时间")
+      // console.log(examEndTime)
       return currentTime >= examStartTime && currentTime < examEndTime;
     }
   },
@@ -143,11 +226,11 @@ export default {
     this.notStartList = this.tabeldata.filter(item =>{
       return !this.isExamTime(item)
     })
-    console.log("startList")
-    console.log(this.startList)
-    console.log("notstartList")
-    console.log(this.notStartList)
-    console.log('Component mounted.')
+    // console.log("startList")
+    // console.log(this.startList)
+    // console.log("notstartList")
+    // console.log(this.notStartList)
+    // console.log('Component mounted.')
   }
 }
 </script>
